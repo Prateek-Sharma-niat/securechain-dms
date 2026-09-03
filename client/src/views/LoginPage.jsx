@@ -76,7 +76,14 @@ export default function LoginPage({
         })
       });
 
-      const data = await res.json();
+      const contentType = res.headers.get('content-type');
+      let data;
+      if (contentType && contentType.includes('application/json')) {
+        data = await res.json();
+      } else {
+        const text = await res.text();
+        throw new Error(text || `Server responded with status ${res.status}`);
+      }
       if (!res.ok) throw new Error(data.error || 'Authentication rejected by security gate.');
 
       toast.success(`Welcome back, ${data.user.name} (${data.user.rank || data.user.role})`);
@@ -107,7 +114,14 @@ export default function LoginPage({
         })
       });
 
-      const data = await res.json();
+      const contentType = res.headers.get('content-type');
+      let data;
+      if (contentType && contentType.includes('application/json')) {
+        data = await res.json();
+      } else {
+        const text = await res.text();
+        throw new Error(text || `Server responded with status ${res.status}`);
+      }
       if (!res.ok) throw new Error(data.error || 'Citizen verification failed');
 
       toast.success(`Authenticated as Citizen ${data.citizen.name}`);
