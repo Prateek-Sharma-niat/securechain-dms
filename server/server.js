@@ -404,11 +404,15 @@ app.post('/api/tamper/restore', (req, res) => {
    START SERVER
    ========================================================= */
 
-app.listen(PORT, () => {
-  console.log(`=======================================================`);
-  console.log(`🚀 SecureChain DMS Server active on port http://localhost:${PORT}`);
-  console.log(`🔒 6-Layer Security Architecture: SHA-256 Hash Chain Ready`);
-  console.log(`🛡️  WORM Audit Log Initialized: Append-Only Protection`);
-  console.log(`⚖️  M-of-N Quorum Consensus Engine Online`);
-  console.log(`=======================================================`);
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`=======================================================`);
+    console.log(`🚀 SecureChain DMS Server active on port http://localhost:${PORT}`);
+    console.log(`🔒 6-Layer Security Architecture: SHA-256 Hash Chain Ready`);
+    console.log(`🛡️  WORM Audit Log Initialized: Append-Only Protection`);
+    console.log(`⚖️  M-of-N Quorum Consensus Engine Online`);
+    console.log(`=======================================================`);
+  });
+}
+
+module.exports = app;
