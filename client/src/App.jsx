@@ -273,7 +273,7 @@ function AppContent() {
   const t = translations[lang] || translations.en;
 
   return (
-    <div className={`min-h-screen flex flex-col bg-[#FFF9F2] dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200 ${highContrast ? 'contrast-125' : ''} ${fontScaleClass}`}>
+    <div className={`min-h-screen flex flex-col bg-[#FFF9F2] dark:bg-slate-950 text-slate-900 dark:text-slate-100 ${highContrast ? 'contrast-125' : ''} ${fontScaleClass}`}>
       
       {/* 1. Top Micro-Strip with Dark Mode Toggle & Shortcut Triggers */}
       <TopMicroStrip
@@ -284,7 +284,19 @@ function AppContent() {
         highContrast={highContrast}
         onToggleHighContrast={handleToggleHighContrast}
         darkMode={darkMode}
-        onToggleDarkMode={() => setDarkMode(prev => !prev)}
+        onToggleDarkMode={() => {
+          setDarkMode(prev => {
+            const next = !prev;
+            if (next) {
+              document.documentElement.classList.add('dark');
+              localStorage.setItem('theme', 'dark');
+            } else {
+              document.documentElement.classList.remove('dark');
+              localStorage.setItem('theme', 'light');
+            }
+            return next;
+          });
+        }}
         onOpenShortcuts={() => setShortcutsOpen(true)}
       />
 

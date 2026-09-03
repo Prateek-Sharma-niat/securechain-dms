@@ -51,7 +51,18 @@ app.post('/api/auth/login', (req, res) => {
     return res.status(400).json({ error: "Employee / Credential ID is required." });
   }
 
-  const user = DEMO_PERSONAS.find(p => p.id.trim().toUpperCase() === employeeId.trim().toUpperCase());
+  const cleanId = employeeId.trim().toUpperCase();
+  let user = DEMO_PERSONAS.find(p => p.id.trim().toUpperCase() === cleanId || p.badge?.trim().toUpperCase() === cleanId);
+
+  if (!user && rolePortal) {
+    user = DEMO_PERSONAS.find(p => p.portalRole === rolePortal);
+  } else if (!user) {
+    if (cleanId.startsWith('JUD')) user = DEMO_PERSONAS.find(p => p.portalRole === 'JUDICIAL');
+    else if (cleanId.startsWith('FSL')) user = DEMO_PERSONAS.find(p => p.portalRole === 'FORENSIC');
+    else if (cleanId.startsWith('POL')) user = DEMO_PERSONAS.find(p => p.portalRole === 'POLICE');
+    else if (cleanId.startsWith('AUD')) user = DEMO_PERSONAS.find(p => p.portalRole === 'AUDITOR');
+  }
+
   if (!user) {
     return res.status(401).json({ error: `Invalid ID '${employeeId}'. Please select an authorized officer ID.` });
   }

@@ -58,6 +58,22 @@ const DEMO_PERSONAS = [
 
   // 2. JUDICIAL AUTHORITIES
   {
+    id: "JUD-ND-1044",
+    portalRole: "JUDICIAL",
+    name: "Judicial Officer (Hon. Justice Iyer / Presiding Magistrate)",
+    role: "Presiding Magistrate / Judicial Authority",
+    department: "Patiala House Courts, New Delhi (Special Investigation Court)",
+    badge: "JUD-1044",
+    rank: "Presiding Magistrate",
+    pseudonym: "Judicial_Authority",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=120&auto=format&fit=crop&q=80",
+    canRequestEdit: false,
+    canApprove: true,
+    canDeAnonymize: true,
+    court: "Patiala House Courts, New Delhi",
+    otp: "123456"
+  },
+  {
     id: "JUD-DEL-089",
     portalRole: "JUDICIAL",
     name: "Judicial Officer (Magistrate / Audit Authority)",
@@ -91,6 +107,22 @@ const DEMO_PERSONAS = [
   },
 
   // 3. FORENSIC SCIENTISTS & EXPERTS
+  {
+    id: "FSL-EXP-209",
+    portalRole: "FORENSIC",
+    name: "Forensic Officer (Dr. Sunita Rao / Scientific Examiner)",
+    role: "Chief Scientific Examiner & Digital Forensics Head",
+    department: "Central Forensic Science Laboratory (CFSL), New Delhi",
+    badge: "FSL-209",
+    rank: "Senior Scientific Officer",
+    pseudonym: "Forensic_Examiner",
+    avatar: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=120&auto=format&fit=crop&q=80",
+    canRequestEdit: true,
+    canApprove: true,
+    canDeAnonymize: false,
+    labUnit: "CFSL New Delhi",
+    otp: "123456"
+  },
   {
     id: "FSL-CBI-702",
     portalRole: "FORENSIC",
