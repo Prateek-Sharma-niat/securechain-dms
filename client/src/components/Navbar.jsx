@@ -38,18 +38,15 @@ export default function Navbar({
   
   const [casesMenuOpen, setCasesMenuOpen] = useState(false);
   const [helpMenuOpen, setHelpMenuOpen] = useState(false);
-  const [roleMenuOpen, setRoleMenuOpen] = useState(false);
 
   const casesRef = useRef(null);
   const helpRef = useRef(null);
-  const roleRef = useRef(null);
 
   // Close dropdowns on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (casesRef.current && !casesRef.current.contains(event.target)) setCasesMenuOpen(false);
       if (helpRef.current && !helpRef.current.contains(event.target)) setHelpMenuOpen(false);
-      if (roleRef.current && !roleRef.current.contains(event.target)) setRoleMenuOpen(false);
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -256,75 +253,33 @@ export default function Navbar({
 
         </div>
 
-        {/* Right: Role Indicator, Switch Role, & Logout */}
+        {/* Right: Authenticated Cadre Display & Direct Sign Out */}
         <div className="flex items-center space-x-2.5">
           
           {activeUser ? (
-            <div className="relative" ref={roleRef}>
-              <button
-                onClick={() => setRoleMenuOpen(!roleMenuOpen)}
-                className="flex items-center space-x-2 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-orange-300 dark:hover:border-slate-700 bg-slate-50 dark:bg-slate-800 transition-colors cursor-pointer"
-              >
+            <div className="flex items-center gap-2">
+              {/* Authenticated Officer Identifier (Locked to detected role) */}
+              <div className="flex items-center space-x-2 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800">
                 <div className={`w-2.5 h-2.5 rounded-full ${getRoleDotColor(activeUser.portalRole)}`}></div>
                 <div className="text-left hidden sm:block">
                   <div className="text-xs font-bold text-slate-900 dark:text-slate-100 leading-tight">
                     {activeUser.name}
                   </div>
-                  <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
-                    {activeUser.role}
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium font-mono">
+                    {activeUser.badge || activeUser.role}
                   </div>
                 </div>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400 ml-1" />
+              </div>
+
+              {/* Direct Sign Out Button */}
+              <button
+                onClick={onLogout}
+                className="px-3 py-1.5 rounded-xl border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+                title="Sign Out"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Sign Out</span>
               </button>
-
-              {roleMenuOpen && (
-                <div className="absolute right-0 top-full mt-1.5 w-72 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-2 z-50 animate-in fade-in slide-in-from-top-1">
-                  <div className="text-[10px] font-bold text-slate-400 uppercase px-3 py-1.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                    <span>{t.roleSelector}</span>
-                    <span className="text-[9px] font-normal text-slate-400">Authenticated Cadre</span>
-                  </div>
-
-                  <div className="space-y-1 mt-1.5 max-h-72 overflow-y-auto">
-                    {personas.map((p) => (
-                      <button
-                        key={p.id}
-                        onClick={() => {
-                          onSwitchPersona(p);
-                          setRoleMenuOpen(false);
-                        }}
-                        className={`w-full text-left p-2.5 rounded-xl transition-all flex items-start space-x-2.5 cursor-pointer ${
-                          activeUser?.id === p.id 
-                            ? 'bg-orange-50 dark:bg-slate-800 border border-orange-200 dark:border-slate-700' 
-                            : 'hover:bg-slate-50 dark:hover:bg-slate-800/60'
-                        }`}
-                      >
-                        <div className={`w-2.5 h-2.5 rounded-full mt-1 flex-shrink-0 ${getRoleDotColor(p.portalRole)}`}></div>
-                        <div className="flex-1 min-w-0">
-                          <div className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">
-                            {p.name}
-                          </div>
-                          <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
-                            {p.role} • {p.badge || p.id}
-                          </div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-
-                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800 mt-2">
-                    <button
-                      onClick={() => {
-                        setRoleMenuOpen(false);
-                        onLogout();
-                      }}
-                      className="w-full py-1.5 text-center text-xs font-semibold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
-                    >
-                      <LogOut className="w-3.5 h-3.5" />
-                      <span>{t.logout}</span>
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
           ) : (
             <button
