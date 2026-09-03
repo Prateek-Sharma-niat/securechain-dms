@@ -23,7 +23,13 @@ import {
   Layers,
   ChevronRight,
   TrendingUp,
-  Award
+  Award,
+  ExternalLink,
+  Landmark,
+  FileSpreadsheet,
+  BadgeCheck,
+  Scale3D,
+  PhoneCall
 } from 'lucide-react';
 import { translations } from '../i18n/translations';
 
@@ -38,10 +44,10 @@ export default function LandingPage({
   const [hoveredStat, setHoveredStat] = useState(null);
 
   const tickerAdvisories = [
-    "National Advisory: All electronic FIRs filed under CrPC §154 / BNSS §173 are sealed with cryptographic SHA-256 integrity.",
-    "Judicial Standard: Electronic records are certified admissible under Section 65B Indian Evidence Act / Section 63 BSA 2023.",
-    "Integrity Sentinel: Any supplementary modification requires mandatory 2-of-3 independent multi-cadre officer consensus.",
-    "Citizen Desk: Helpline 1930 is operational 24x7 for cyber crime reporting and complaint assistance."
+    "Government Gazette: Bharatiya Sakshya Adhiniyam (BSA), 2023 Section 63 electronic certification is now mandatory for court exhibits.",
+    "National Standard: Bharatiya Nagarik Suraksha Sanhita (BNSS), 2023 Section 173 e-FIR records are sealed with SHA-256 integrity.",
+    "Integrity Mandate: Amendments to case records require 2-of-3 independent multi-cadre consensus under Rule 12 Evidence Standards.",
+    "Citizen Alert: National Cyber Crime Helpline 1930 is operational 24x7 for immediate financial freeze and grievance lodging."
   ];
 
   const statItems = [
@@ -83,6 +89,68 @@ export default function LandingPage({
     }
   ];
 
+  const institutionalWings = [
+    {
+      title: "Law Enforcement Cadre",
+      ministry: "Ministry of Home Affairs",
+      description: "First Information Reports (CrPC 154 / BNSS 173), seizure memos, and panchnama dockets sealed at inception.",
+      tag: "Police / CID / CBI",
+      color: "border-orange-200 dark:border-orange-900 bg-orange-50/50 dark:bg-slate-900",
+      accent: "text-[#FF6A1A]"
+    },
+    {
+      title: "Judicial Magistrate Wing",
+      ministry: "Department of Justice",
+      description: "Direct court scrutiny, remands, bail records, and Section 65B / BSA Section 63 cryptographic admissibility verification.",
+      tag: "Sessions & High Courts",
+      color: "border-sky-200 dark:border-sky-900 bg-sky-50/50 dark:bg-slate-900",
+      accent: "text-sky-600 dark:text-sky-400"
+    },
+    {
+      title: "Forensic Laboratories",
+      ministry: "DFSS / CFSL / RFSL",
+      description: "Raw bitstream dumps, acoustic spectrograms, toxicological exhibits, and digital hash chains sealed under ISO/IEC 17025.",
+      tag: "Forensic Scientists",
+      color: "border-emerald-200 dark:border-emerald-900 bg-emerald-50/50 dark:bg-slate-900",
+      accent: "text-emerald-600 dark:text-emerald-400"
+    },
+    {
+      title: "Statutory Audit Directorate",
+      ministry: "Comptroller & Auditor General / MHA",
+      description: "WORM write-once ledger oversight, Merkle root verification, and independent Sentinel intrusion tamper detection.",
+      tag: "Independent Auditors",
+      color: "border-purple-200 dark:border-purple-900 bg-purple-50/50 dark:bg-slate-900",
+      accent: "text-purple-600 dark:text-purple-400"
+    }
+  ];
+
+  const legalActs = [
+    {
+      code: "BSA §63",
+      name: "Bharatiya Sakshya Adhiniyam, 2023",
+      section: "Section 63 (Admissibility of Electronic Records)",
+      detail: "Replaces Section 65B of Indian Evidence Act 1872. Codifies automated cryptographic hashing, device provenance, and custodian signatures for direct courtroom trial presentation."
+    },
+    {
+      code: "BNSS §173",
+      name: "Bharatiya Nagarik Suraksha Sanhita, 2023",
+      section: "Section 173 (Electronic Information in Cognizable Crimes)",
+      detail: "Mandates electronic lodging of FIRs (e-FIR) and digital case diary recording. Requires tamper-evident timestamps within 3 days of complaint filing."
+    },
+    {
+      code: "IT Act §79A",
+      name: "Information Technology Act, 2000",
+      section: "Section 79A & Central Examiner Accreditation",
+      detail: "Empowers the Central Government to notify accredited examiners of electronic evidence, ensuring cryptographic tools follow verifiable mathematical standards."
+    },
+    {
+      code: "DPDP 2023",
+      name: "Digital Personal Data Protection Act, 2023",
+      section: "Section 7 & 8 (Law Enforcement Sovereign Exemption)",
+      detail: "Preserves victim and witness privacy with pseudonymous review queues while ensuring lawful state processing under statutory security safeguards."
+    }
+  ];
+
   return (
     <div className="bg-[#FFF9F2] dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex-1 flex flex-col transition-colors">
       
@@ -90,7 +158,7 @@ export default function LandingPage({
       <div className="bg-[#FFF3E6] dark:bg-slate-900/80 border-b border-orange-200/80 dark:border-slate-800 px-4 sm:px-8 py-2 text-xs flex items-center space-x-3 overflow-hidden select-none">
         <div className="flex items-center gap-1.5 font-bold text-[#FF6A1A] uppercase tracking-wider flex-shrink-0 bg-white dark:bg-slate-800 px-2.5 py-1 rounded-md border border-orange-300 dark:border-orange-800/60 shadow-xs">
           <Bell className="w-3.5 h-3.5 animate-bounce" />
-          <span>{lang === 'hi' ? 'ताज़ा सूचना' : "What's New"}</span>
+          <span>{lang === 'hi' ? 'ताज़ा सूचना' : "Gazette Advisory"}</span>
         </div>
         <div className="overflow-hidden whitespace-nowrap text-slate-700 dark:text-slate-300 font-medium text-xs">
           <div className="inline-block animate-marquee pl-4">
@@ -100,12 +168,12 @@ export default function LandingPage({
       </div>
 
       {/* 2. Hero Section */}
-      <section className="px-4 sm:px-8 pt-10 sm:pt-14 pb-12 max-w-7xl mx-auto w-full">
+      <section className="px-4 sm:px-8 pt-10 sm:pt-14 pb-10 max-w-7xl mx-auto w-full">
         <div className="text-center max-w-3xl mx-auto space-y-5">
           
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-100 dark:bg-orange-950/60 border border-orange-300 dark:border-orange-800/80 text-[#FF6A1A] text-xs font-bold shadow-xs">
             <Shield className="w-3.5 h-3.5" />
-            <span>National Electronic Docket Custody Architecture</span>
+            <span>National Sovereign Legal Evidence Architecture • Government of India</span>
           </div>
 
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
@@ -114,10 +182,10 @@ export default function LandingPage({
           </h1>
 
           <p className="text-xs sm:text-sm md:text-base text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl mx-auto">
-            SecureChain DMS establishes an unbreakable digital chain of custody for FIRs, forensic exhibits, and judicial records. Sealed at inception, mathematically tamper-evident, and accessible for direct citizen tracking.
+            SecureChain DMS establishes a tamper-evident digital chain of custody for FIRs, forensic exhibits, and judicial records. Certified under the Bharatiya Sakshya Adhiniyam (BSA) 2023, BNSS 2023, and ISO/IEC 27037 standards.
           </p>
 
-          {/* Primary Action Buttons: Citizen Tracking vs Official Sign In */}
+          {/* Primary Action Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-3">
             <button
               onClick={onGoToCitizen}
@@ -193,19 +261,61 @@ export default function LandingPage({
         </div>
       </section>
 
-      {/* 4. Core Features Showcase (Replacing cluttered login boxes) */}
-      <section className="px-4 sm:px-8 py-12 bg-white dark:bg-slate-900/60 border-y border-slate-200 dark:border-slate-800 mt-6 transition-colors">
+      {/* 4. Official Government Inter-Agency Pillars */}
+      <section className="px-4 sm:px-8 py-10 max-w-7xl mx-auto w-full space-y-6">
+        <div className="text-center space-y-2">
+          <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-orange-100 dark:bg-orange-950 text-[#FF6A1A] border border-orange-200 dark:border-orange-800">
+            Four Pillars of Justice
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            Inter-Agency Judicial & Law Enforcement Matrix
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
+            Unified zero-trust architecture enabling cryptographic evidence handoffs across Indian statutory agencies.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 pt-2">
+          {institutionalWings.map((wing, i) => (
+            <div 
+              key={i} 
+              className={`border rounded-3xl p-6 space-y-3 transition-all duration-200 hover:-translate-y-1 hover:shadow-md ${wing.color}`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
+                  {wing.tag}
+                </span>
+                <Landmark className={`w-4 h-4 ${wing.accent}`} />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
+                  {wing.title}
+                </h3>
+                <div className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                  {wing.ministry}
+                </div>
+              </div>
+              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                {wing.description}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 5. Core Platform Features */}
+      <section className="px-4 sm:px-8 py-12 bg-white dark:bg-slate-900/60 border-y border-slate-200 dark:border-slate-800 transition-colors">
         <div className="max-w-7xl mx-auto space-y-8">
           
           <div className="text-center space-y-2">
             <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-orange-100 dark:bg-orange-950 text-[#FF6A1A] border border-orange-200 dark:border-orange-800">
-              Platform Architecture
+              Technical Architecture
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-              Enterprise Features Built for Indian Jurisprudence
+              Enterprise Specifications Built for Indian Evidence Law
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
-              Engineered to meet statutory evidentiary standards under Bharatiya Nagarik Suraksha Sanhita (BNSS) and Bharatiya Sakshya Adhiniyam (BSA).
+              Engineered to fulfill evidentiary mandates under Bharatiya Sakshya Adhiniyam (BSA) and CCTNS Interoperability guidelines.
             </p>
           </div>
 
@@ -225,7 +335,7 @@ export default function LandingPage({
                 </span>
               </div>
               <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                Scanned documents are analyzed with character-level confidence heatmapping. Hashes are sealed strictly upon human verification, preventing OCR noise from polluting legal dockets.
+                Scanned documents are analyzed with character-level confidence heatmapping. Hashes are sealed strictly upon human confirmation, preventing OCR noise from polluting legal dockets.
               </p>
             </div>
 
@@ -288,8 +398,52 @@ export default function LandingPage({
         </div>
       </section>
 
-      {/* 5. Citizen Empowerment & Transparency */}
+      {/* 6. Statutory Acts & Gazette Reference Grid */}
       <section className="px-4 sm:px-8 py-12 max-w-7xl mx-auto w-full space-y-6">
+        <div className="text-center space-y-2">
+          <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-orange-100 dark:bg-orange-950 text-[#FF6A1A] border border-orange-200 dark:border-orange-800">
+            Legislative Compliance
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            Statutory Framework & Central Criminal Laws
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
+            Grounded in the new criminal law enactments passed by the Parliament of India.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
+          {legalActs.map((act, i) => (
+            <div 
+              key={i}
+              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 space-y-3 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all"
+            >
+              <div className="flex items-center justify-between">
+                <span className="px-2.5 py-1 rounded-lg bg-orange-50 dark:bg-orange-950 text-[#FF6A1A] font-mono text-xs font-bold border border-orange-200 dark:border-orange-800">
+                  {act.code}
+                </span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  Parliament of India
+                </span>
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
+                  {act.name}
+                </h3>
+                <div className="text-xs font-semibold text-[#FF6A1A] mt-0.5">
+                  {act.section}
+                </div>
+              </div>
+              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                {act.detail}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 7. Citizen Empowerment & Transparency */}
+      <section className="px-4 sm:px-8 py-10 max-w-7xl mx-auto w-full space-y-6">
         <div className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-slate-900 dark:to-slate-900 border border-orange-200 dark:border-slate-800 rounded-3xl p-8 sm:p-12 shadow-sm flex flex-col md:flex-row items-center justify-between gap-8">
           
           <div className="space-y-3 max-w-xl">
@@ -302,7 +456,7 @@ export default function LandingPage({
             <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
               No legal jargon, complex hash codes, or official credentials required. Simply verify your 10-digit registered mobile number or enter your FIR acknowledgement number to see plain-language investigation updates.
             </p>
-            <div className="pt-2">
+            <div className="pt-2 flex flex-wrap items-center gap-3">
               <button
                 onClick={onGoToCitizen}
                 className="px-6 py-3 bg-[#FF6A1A] hover:bg-[#E85B0E] text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer"
@@ -310,6 +464,16 @@ export default function LandingPage({
                 <span>Access Citizen Tracking Portal</span>
                 <ChevronRight className="w-4 h-4" />
               </button>
+
+              <a 
+                href="https://pgportal.gov.in" 
+                target="_blank" 
+                rel="noreferrer"
+                className="px-4 py-3 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl border border-slate-300 dark:border-slate-700 shadow-xs transition-all flex items-center gap-1.5"
+              >
+                <span>CPGRAMS Grievance</span>
+                <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+              </a>
             </div>
           </div>
 
