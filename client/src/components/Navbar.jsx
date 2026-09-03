@@ -65,7 +65,7 @@ export default function Navbar({
 
   return (
     <nav className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40 shadow-xs select-none transition-colors">
-      <div className="max-w-7xl mx-auto px-4 sm:px-8 flex items-center justify-between h-[54px]">
+      <div className="w-full px-4 sm:px-6 flex items-center justify-between h-[54px]">
         
         {/* Left: Navigation Tabs */}
         <div className="flex items-center space-x-1 sm:space-x-1.5">

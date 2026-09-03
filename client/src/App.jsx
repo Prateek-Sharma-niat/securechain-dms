@@ -298,6 +298,8 @@ function AppContent() {
           });
         }}
         onOpenShortcuts={() => setShortcutsOpen(true)}
+        activeUser={activeUser}
+        onLogout={handleLogout}
       />
 
       {/* 2. Main Header */}
