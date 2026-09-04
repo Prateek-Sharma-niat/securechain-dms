@@ -151,7 +151,7 @@ class WormAuditLogger {
     // MANDATORY: Log de-anonymization access to WORM Layer 6
     const logEntry = this.append({
       layerNumber: 6,
-      layerName: "Layer 6 - Judicial De-anonymization Audit",
+      layerName: "Layer 6 - Statutory De-anonymization Audit",
       employeeId: authorizedOfficer.id,
       role: authorizedOfficer.role,
       action: "LEGAL_DEANONYMIZATION_DISCLOSURE",

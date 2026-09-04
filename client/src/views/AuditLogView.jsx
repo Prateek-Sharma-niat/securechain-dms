@@ -183,13 +183,13 @@ export default function AuditLogView({ onBack, lang = 'en' }) {
               </thead>
 
               <tbody className="divide-y divide-slate-100 text-slate-800">
-                {filteredLogs.map((log) => {
+                {filteredLogs.map((log, index) => {
                   const isRowVerified = verifiedRows.has(log.id);
                   const displayHash = log.afterHash || log.logHash || log.beforeHash || "3d5f8a...5c11";
                   const truncated = `${displayHash.substring(0, 8)}...${displayHash.substring(displayHash.length - 6)}`;
 
                   return (
-                    <tr key={log.id} className="hover:bg-slate-50/80 transition-colors">
+                    <tr key={log.id || `${log.timestamp}-${index}`} className="hover:bg-slate-50/80 transition-colors">
                       
                       {/* 1. Timestamp */}
                       <td className="py-3.5 px-4 font-mono text-[11px] text-slate-500 whitespace-nowrap">

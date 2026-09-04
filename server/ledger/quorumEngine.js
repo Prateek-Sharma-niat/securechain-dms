@@ -19,11 +19,52 @@ class QuorumEngine {
     requesterName,
     requesterRole,
     editSummary,
-    threshold = 2,
-    totalEligible = 3,
+    severityText = "",
+    threshold,
+    totalEligible,
     eligibleApprovers = []
   }) {
     const sessionKey = `${docId}_${version}`;
+
+    // Master Spec Section 20.2: Severity-based approval routing
+    const textToCheck = `${editSummary || ""} ${severityText || ""}`.toLowerCase();
+    const highKeywords = ["murder", "homicide", "rape", "terrorism", "terror", "explosive", "uapa", "kidnap", "arms act", "sedition"];
+    const lowKeywords = ["petty theft", "minor dispute", "traffic", "noise", "lost article", "defamation"];
+
+    let pool = "DISTRICT_LEVEL";
+    let poolLabel = "District Police Review Pool";
+    let calculatedThreshold = threshold || 2;
+    let calculatedTotal = totalEligible || 3;
+
+    if (highKeywords.some(k => textToCheck.includes(k))) {
+      pool = "STATE_LEVEL";
+      poolLabel = "State Police Review Pool";
+      calculatedThreshold = threshold || 3;
+      calculatedTotal = totalEligible || 5;
+    } else if (lowKeywords.some(k => textToCheck.includes(k))) {
+      pool = "DISTRICT_LEVEL";
+      poolLabel = "District Police Review Pool";
+      calculatedThreshold = threshold || 1;
+      calculatedTotal = totalEligible || 1;
+    }
+
+    // Ensure we have enough approver slots for calculatedTotal
+    const slotsCount = Math.max(calculatedTotal, eligibleApprovers.length);
+    const slots = [];
+    for (let i = 0; i < slotsCount; i++) {
+      const approver = eligibleApprovers[i] || {};
+      slots.push({
+        slotIndex: i + 1,
+        approverId: approver.id || `APPROVER_NODE_${i + 1}`,
+        pseudonym: `Approver_${i + 1}`,
+        title: `Approver ${i + 1}`,
+        avatar: `Officer #${i + 1}`,
+        hasVoted: false,
+        vote: null, // "APPROVE" | "REJECT"
+        votedAt: null,
+        comment: null
+      });
+    }
 
     const session = {
       sessionKey,
@@ -33,23 +74,14 @@ class QuorumEngine {
       requesterName,
       requesterRole,
       editSummary,
-      threshold,
-      totalEligible,
+      threshold: calculatedThreshold,
+      totalEligible: calculatedTotal,
+      pool,
+      poolLabel,
       status: "PENDING_QUORUM", // PENDING_QUORUM | APPROVED | REJECTED
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      // Pre-assigned anonymous approver slots
-      approverSlots: eligibleApprovers.map((approver, index) => ({
-        slotIndex: index + 1,
-        approverId: approver.id,
-        pseudonym: approver.pseudonym || `Approver_Node_${index + 1}`,
-        title: approver.title || `Supervisory Reviewer ${index + 1}`,
-        avatar: approver.avatar || `Officer #${index + 1}`,
-        hasVoted: false,
-        vote: null, // "APPROVE" | "REJECT"
-        votedAt: null,
-        comment: null
-      })),
+      approverSlots: slots.slice(0, calculatedTotal),
       votes: [], // audit trail of cast votes
       approvalCount: 0,
       rejectionCount: 0

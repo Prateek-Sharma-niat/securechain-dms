@@ -150,7 +150,7 @@ export default function CitizenPortalView({
   };
 
   return (
-    <div className="flex-1 bg-[#FFF9F2] dark:bg-slate-950 min-h-[calc(100vh-140px)] p-4 sm:p-8 flex flex-col justify-start transition-colors">
+    <div className="flex-1 bg-[#FFF9F2] dark:bg-slate-950 min-h-[calc(100vh-140px)] p-3 sm:p-8 flex flex-col justify-start transition-colors w-full">
       <div className="max-w-4xl mx-auto w-full space-y-6">
         
         {/* Navigation Breadcrumb */}
@@ -315,7 +315,7 @@ export default function CitizenPortalView({
           <div className="space-y-6">
             
             {/* Welcome Citizen Header */}
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm flex flex-wrap items-center justify-between gap-4 transition-colors">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors w-full">
               <div>
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700">
                   Verified Citizen Session

@@ -13,14 +13,14 @@ export default function MainHeader({ lang = 'en' }) {
   const t = translations[lang] || translations.en;
 
   return (
-    <header className="bg-[#FFF9F2] border-b border-slate-200 py-3.5 px-4 sm:px-8 select-none">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
+    <header className="bg-[#FFF9F2] border-b border-slate-200 py-2.5 sm:py-3.5 px-2 sm:px-4 md:px-6 select-none w-full">
+      <div className="w-full flex items-center justify-between">
         
-        {/* Left: Ashoka Stambh + Bilingual Title Stack */}
-        <div className="flex items-center space-x-4">
+        {/* Left: Ashoka Stambh + Bilingual Title Stack in the Left Corner */}
+        <div className="flex items-center space-x-2.5 sm:space-x-3.5">
           
           {/* Authentic Ashoka Stambh Silhouette */}
-          <AshokaEmblem className="w-12 h-16 sm:w-14 sm:h-18" color="#12161C" />
+          <AshokaEmblem className="w-11 h-15 sm:w-14 sm:h-18" color="#12161C" />
 
           {/* Bilingual Title Stack */}
           <div className="flex flex-col justify-center">

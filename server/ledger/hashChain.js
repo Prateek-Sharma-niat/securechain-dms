@@ -23,7 +23,7 @@ function createGenesisBlock() {
   const timestamp = "2024-01-01T00:00:00.000Z";
   const payload = {
     system: "SecureChain DMS — National Digital Evidence Repository",
-    genesisMessage: "National Cyber Crime Reporting Portal Cryptographic Root Anchor",
+    genesisMessage: "National Investigation Records Cryptographic Root Anchor",
     authority: "Ministry of Home Affairs, Government of India"
   };
   const payloadHash = sha256(payload);

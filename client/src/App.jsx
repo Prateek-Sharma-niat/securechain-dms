@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import TopMicroStrip from './components/TopMicroStrip';
 import MainHeader from './components/MainHeader';
 import FlagBanner from './components/FlagBanner';
@@ -12,6 +12,7 @@ import BackToTop from './components/BackToTop';
 import LandingPage from './views/LandingPage';
 import LoginPage from './views/LoginPage';
 import DashboardView from './views/DashboardView';
+import ApprovalsView from './views/ApprovalsView';
 import AuditorDashboard from './views/dashboards/AuditorDashboard';
 import CitizenPortalView from './views/CitizenPortalView';
 import DocumentDetailView from './views/DocumentDetailView';
@@ -42,6 +43,7 @@ function AppContent() {
   const [loginRoleIntent, setLoginRoleIntent] = useState('POLICE');
   const [selectedDoc, setSelectedDoc] = useState(null);
   const [isViewingChain, setIsViewingChain] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   // Modals
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
@@ -61,6 +63,10 @@ function AppContent() {
   });
   const [loading, setLoading] = useState(true);
 
+  // Keyboard shortcut state sequence tracking
+  const lastKeyRef = useRef(null);
+  const lastKeyTimerRef = useRef(null);
+
   // Apply dark mode class to <html> element
   useEffect(() => {
     if (darkMode) {
@@ -72,41 +78,89 @@ function AppContent() {
     }
   }, [darkMode]);
 
-  // Global Keyboard Shortcuts
+  // Section 14 Global Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Toggle dark mode (Alt + D)
-      if (e.altKey && (e.key === 'd' || e.key === 'D')) {
-        e.preventDefault();
-        setDarkMode(prev => !prev);
-      }
-      // Toggle Shortcuts (Shift + / or ?)
-      if (e.key === '?' && !['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
-        e.preventDefault();
-        setShortcutsOpen(prev => !prev);
-      }
-      // Go to Home (Alt + H)
-      if (e.altKey && (e.key === 'h' || e.key === 'H')) {
-        e.preventDefault();
-        setCurrentTab('home');
-        setSelectedDoc(null);
-      }
-      // Go to Citizen Portal (Alt + C)
-      if (e.altKey && (e.key === 'c' || e.key === 'C')) {
-        e.preventDefault();
-        setCurrentTab('citizen');
-      }
-      // Escape closes modals
+      const isInput = ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName);
+
+      // Escape closes any open modal
       if (e.key === 'Escape') {
         setShortcutsOpen(false);
         setUploadModalOpen(false);
         setQuorumModalOpen(false);
+        return;
+      }
+
+      // Alt + D: Toggle Dark Mode
+      if (e.altKey && (e.key === 'd' || e.key === 'D')) {
+        e.preventDefault();
+        setDarkMode(prev => !prev);
+        return;
+      }
+
+      // If user is inside an input, don't trigger navigation shortcuts
+      if (isInput) return;
+
+      // '/': Focus search bar
+      if (e.key === '/') {
+        e.preventDefault();
+        const searchInput = document.querySelector('input[type="text"], input[type="search"]');
+        if (searchInput) {
+          searchInput.focus();
+        }
+        return;
+      }
+
+      // '?': Open shortcuts help modal
+      if (e.key === '?') {
+        e.preventDefault();
+        setShortcutsOpen(true);
+        return;
+      }
+
+      // 'g' then 'd': Go to dashboard home
+      // 'g' then 'a': Go to approvals
+      if (e.key === 'g' || e.key === 'G') {
+        lastKeyRef.current = 'g';
+        clearTimeout(lastKeyTimerRef.current);
+        lastKeyTimerRef.current = setTimeout(() => {
+          lastKeyRef.current = null;
+        }, 1000);
+        return;
+      }
+
+      if (lastKeyRef.current === 'g') {
+        if (e.key === 'd' || e.key === 'D') {
+          e.preventDefault();
+          lastKeyRef.current = null;
+          if (activeUser?.portalRole === 'CITIZEN') {
+            setCurrentTab('citizen');
+          } else if (activeUser) {
+            setCurrentTab('dashboard');
+          } else {
+            setCurrentTab('home');
+          }
+          setSelectedDoc(null);
+          return;
+        }
+
+        if (e.key === 'a' || e.key === 'A') {
+          e.preventDefault();
+          lastKeyRef.current = null;
+          if (activeUser?.portalRole === 'POLICE' || activeUser?.portalRole === 'JUDICIAL' || activeUser?.portalRole === 'FORENSIC') {
+            setCurrentTab('approvals');
+            setSelectedDoc(null);
+          } else {
+            toast.info("Approvals queue is restricted to supervisory review cadres.");
+          }
+          return;
+        }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [activeUser]);
 
   // Fetch initial data from backend
   const fetchAllData = async () => {
@@ -154,16 +208,23 @@ function AppContent() {
     setHighContrast(prev => !prev);
   };
 
+  // Route Guard per Master Spec Section 4 & 5
   const handleSelectTab = (tabId) => {
-    // Audit Log access control: ONLY AUDITORS can view WORM Audit Vault
+    // Audit Log access control: ONLY AUDITOR can view WORM Audit Vault
     if (tabId === 'audit') {
       if (activeUser?.portalRole !== 'AUDITOR') {
-        toast.warning("Access Restricted: The WORM Cryptographic Ledger is exclusively accessible by certified Ministry of Home Affairs Auditors.");
+        toast.warning("Access Restricted: The WORM Cryptographic Ledger is strictly restricted to certified Ministry of Home Affairs Auditors.");
         return;
       }
     }
 
-    // Dashboard access control: if user clicks dashboard without logging in, route to login
+    // Citizen isolation: Citizen can only view citizen portal
+    if (activeUser?.portalRole === 'CITIZEN' && tabId === 'dashboard') {
+      setCurrentTab('citizen');
+      return;
+    }
+
+    // Dashboard access control: if not logged in, prompt login
     if (tabId === 'dashboard' && !activeUser) {
       setLoginRoleIntent('POLICE');
       setCurrentTab('login');
@@ -173,6 +234,7 @@ function AppContent() {
     setCurrentTab(tabId);
     setSelectedDoc(null);
     setIsViewingChain(false);
+    setMobileSidebarOpen(false);
   };
 
   const handleSelectDocument = (doc) => {
@@ -200,19 +262,13 @@ function AppContent() {
     toast.info(`Switched active cadre to ${persona.name} (${persona.role})`);
   };
 
-  const handleSwitchUserById = (userId) => {
-    const p = personas.find(item => item.id === userId);
-    if (p) {
-      setActiveUser(p);
-      toast.info(`Acting as ${p.name}`);
-    }
-  };
-
   const handleLoginSuccess = (user) => {
     setActiveUser(user);
     toast.success(`Authenticated successfully as ${user.name}`);
     if (user.portalRole === 'AUDITOR') {
-      setCurrentTab('audit');
+      setCurrentTab('dashboard');
+    } else if (user.portalRole === 'CITIZEN') {
+      setCurrentTab('citizen');
     } else {
       setCurrentTab('dashboard');
     }
@@ -273,9 +329,9 @@ function AppContent() {
   const t = translations[lang] || translations.en;
 
   return (
-    <div className={`min-h-screen flex flex-col bg-[#FFF9F2] dark:bg-slate-950 text-slate-900 dark:text-slate-100 ${highContrast ? 'contrast-125' : ''} ${fontScaleClass}`}>
+    <div className={`min-h-screen w-full flex flex-col bg-[#FFF9F2] dark:bg-slate-950 text-slate-900 dark:text-slate-100 overflow-x-hidden ${highContrast ? 'contrast-125' : ''} ${fontScaleClass}`}>
       
-      {/* 1. Top Micro-Strip with Dark Mode Toggle & Shortcut Triggers */}
+      {/* 1. Top Micro-Strip with Dark Mode Toggle & Accessibility */}
       <TopMicroStrip
         lang={lang}
         onToggleLang={handleToggleLang}
@@ -298,14 +354,12 @@ function AppContent() {
           });
         }}
         onOpenShortcuts={() => setShortcutsOpen(true)}
-        activeUser={activeUser}
-        onLogout={handleLogout}
       />
 
-      {/* 2. Main Header */}
+      {/* 2. Main Header with Official Ashoka Stambh Emblem */}
       <MainHeader lang={lang} />
 
-      {/* 3. Primary Navbar */}
+      {/* 3. Primary Navbar with Single Login and Single Sign Out Button */}
       <Navbar
         currentTab={selectedDoc || isViewingChain ? 'cases' : currentTab}
         onSelectTab={handleSelectTab}
@@ -316,15 +370,17 @@ function AppContent() {
         onSwitchPersona={handleSwitchPersona}
         onOpenUpload={() => setUploadModalOpen(true)}
         lang={lang}
+        onToggleMobileSidebar={() => setMobileSidebarOpen(prev => !prev)}
+        isDashboardActive={currentTab === 'dashboard' || currentTab === 'cases'}
       />
 
-      {/* 4. Indian Flag Banner */}
+      {/* 4. Real Indian Flag Banner (Full-Width Saffron/White/Green with Navy Ashoka Chakra) */}
       <FlagBanner />
 
       {/* 5. Main Content Area */}
-      <main className="flex-1 flex flex-col">
+      <main className="flex-1 flex flex-col w-full min-w-0">
         
-        {/* Dedicated Login View */}
+        {/* Dedicated Single Unified Login View (/login) */}
         {currentTab === 'login' ? (
           <LoginPage
             onLoginSuccess={handleLoginSuccess}
@@ -332,11 +388,9 @@ function AppContent() {
             initialRole={loginRoleIntent}
           />
         ) : selectedDoc && !isViewingChain ? (
-          /* Real Indian FIR Document Viewer */
+          /* Dedicated Real Indian FIR Document Viewer (CrPC 154) */
           <DocumentDetailView
             document={selectedDoc}
-            allDocuments={documents}
-            onSelectDocument={handleSelectDocument}
             onRequestEdit={handleRequestEdit}
             onOpenQuorum={handleOpenQuorum}
             activeUser={activeUser}
@@ -353,7 +407,7 @@ function AppContent() {
             lang={lang}
           />
         ) : currentTab === 'home' ? (
-          /* Public Homepage / Feature Showcase */
+          /* Purely Informational Public Landing Page */
           <LandingPage
             onOpenRoleLogin={handleOpenRoleLogin}
             onGoToDashboard={() => {
@@ -375,7 +429,7 @@ function AppContent() {
             onBackToHome={() => handleSelectTab('home')}
           />
         ) : currentTab === 'dashboard' || currentTab === 'cases' ? (
-          /* Role-Based Dashboard View */
+          /* Role-Based Dedicated Dashboard View */
           <DashboardView
             documents={documents}
             metrics={metrics}
@@ -384,119 +438,111 @@ function AppContent() {
             onOpenQuorum={handleOpenQuorum}
             onGoToAudit={() => handleSelectTab('audit')}
             onGoToChain={handleGoToChain}
+            onNavigateToApprovals={() => setCurrentTab('approvals')}
             activeUser={activeUser}
             onSelectTab={handleSelectTab}
             lang={lang}
+            mobileSidebarOpen={mobileSidebarOpen}
+            onCloseMobileSidebar={() => setMobileSidebarOpen(false)}
+            onOpenMobileSidebar={() => setMobileSidebarOpen(true)}
           />
         ) : currentTab === 'approvals' ? (
-          /* Quorum Approvals Queue */
-          <div className="flex-1 bg-[#FFF9F2] dark:bg-slate-950 p-6 sm:p-12 flex flex-col items-center">
-            <div className="max-w-4xl w-full space-y-6">
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs flex items-center justify-between">
-                <div>
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-orange-100 dark:bg-orange-950 text-[#FF6A1A] border border-orange-200 dark:border-orange-800">
-                    M-of-N Consensus Board
-                  </span>
-                  <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 tracking-tight mt-1">
-                    {lang === 'hi' ? 'लंबित कोरम अनुमोदन कतार' : 'Pending Quorum Approvals (Independent Review)'}
-                  </h2>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    {lang === 'hi' ? '2-से-3 अधिकारियों की औपचारिक सहमति हेतु प्रस्तुत संशोधन' : 'Supplementary amendments requiring 2-of-3 supervisory validation before committing'}
-                  </p>
-                </div>
-                <span className="px-3 py-1 bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 font-bold text-xs rounded-full border border-amber-300 dark:border-amber-800">
-                  {metrics.pendingQuorumCount} Active Session
-                </span>
-              </div>
-
-              {documents.filter(d => d.status === 'PENDING_QUORUM').map(doc => (
-                <div key={doc.id} className="bg-white dark:bg-slate-900 border-2 border-orange-300 dark:border-orange-700/60 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-                  <div className="space-y-2 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-sm font-bold text-slate-900 dark:text-slate-100 bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded border border-slate-200 dark:border-slate-700">{doc.firNo}</span>
-                      <span className="text-xs text-[#FF6A1A] font-bold">Draft Version {doc.draftVersion || '1.1'}</span>
-                    </div>
-                    <h3 className="font-bold text-base text-slate-900 dark:text-slate-100">{doc.caseTitle}</h3>
-                    <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">{doc.incidentSummary}</p>
-                    <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                      Investigating Officer: <strong className="text-slate-800 dark:text-slate-200">{doc.investigatingOfficer}</strong>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => handleOpenQuorum(doc)}
-                    className="px-5 py-3 bg-[#FF6A1A] hover:bg-[#E85B0E] text-white font-bold rounded-xl text-xs shadow-md transition-all flex items-center gap-2 cursor-pointer flex-shrink-0"
-                  >
-                    <span>Enter Approval Review</span>
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
+          /* Dedicated Quorum Approvals Page (/approvals per Section 12) */
+          <ApprovalsView
+            documents={documents}
+            onVoteSuccess={handleVoteSuccess}
+            onBack={() => setCurrentTab('dashboard')}
+            onBackToDashboard={() => setCurrentTab('dashboard')}
+            activeUser={activeUser}
+            lang={lang}
+          />
         ) : currentTab === 'audit' ? (
           /* WORM Audit Log View - Restricted to Auditor */
           activeUser?.portalRole === 'AUDITOR' ? (
-            <AuditorDashboard 
-              activeUser={activeUser}
-              onLogout={handleLogout}
-              onBackToHome={() => setCurrentTab('home')}
-            />
+            <div className="flex-1 bg-[#FFF9F2] dark:bg-slate-950 p-4 sm:p-8">
+              <AuditorDashboard 
+                activeUser={activeUser}
+                activeTab="audit"
+                lang={lang}
+              />
+            </div>
           ) : (
-            <div className="flex-1 bg-[#FFF9F2] dark:bg-slate-950 p-12 text-center flex flex-col items-center justify-center space-y-4">
-              <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Access Restricted</h2>
-              <p className="text-xs text-slate-500 max-w-md">
-                The WORM Audit Ledger is restricted to authenticated Ministry of Home Affairs Auditors. Please sign in with an Auditor Cadre ID.
-              </p>
-              <button
-                onClick={() => handleOpenRoleLogin('AUDITOR')}
-                className="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-xs"
-              >
-                Sign In as Auditor
-              </button>
+            <div className="flex-1 flex items-center justify-center p-8">
+              <div className="text-center space-y-3 bg-white dark:bg-slate-900 p-8 rounded-3xl border border-rose-300 dark:border-rose-900 max-w-md">
+                <h3 className="font-bold text-rose-600">Access Restricted</h3>
+                <p className="text-xs text-slate-500">Only authorized Statutory Auditors can inspect the WORM audit trail.</p>
+                <button
+                  onClick={() => setCurrentTab('home')}
+                  className="px-4 py-2 bg-[#FF6A1A] text-white text-xs font-bold rounded-xl"
+                >
+                  Return to Home
+                </button>
+              </div>
             </div>
           )
         ) : currentTab === 'contact' ? (
-          /* Legal Directory & Helpdesk */
-          <ContactView lang={lang} />
-        ) : null}
+          <ContactView lang={lang} onBack={() => setCurrentTab('home')} />
+        ) : (
+          <LandingPage
+            onOpenRoleLogin={handleOpenRoleLogin}
+            onGoToDashboard={() => handleSelectTab('dashboard')}
+            onGoToCitizen={() => handleSelectTab('citizen')}
+            activeUser={activeUser}
+            metrics={metrics}
+            lang={lang}
+          />
+        )}
 
       </main>
 
-      {/* 6. Official Government Footer */}
-      <Footer lang={lang} />
+      {/* 6. Government-Standard 4-Column GIGW Compliant Footer with Tricolor Strip */}
+      <Footer lang={lang} onSelectTab={handleSelectTab} />
 
-      {/* Floating Back To Top Button */}
-      <BackToTop />
+      {/* Modals & Dialogs */}
+      {uploadModalOpen && (
+        <UploadModal
+          isOpen={uploadModalOpen}
+          onClose={() => setUploadModalOpen(false)}
+          onUploadSuccess={handleUploadSuccess}
+          activeUser={activeUser}
+        />
+      )}
 
-      {/* Keyboard Shortcuts Modal */}
-      <ShortcutsModal
-        isOpen={shortcutsOpen}
-        onClose={() => setShortcutsOpen(false)}
-      />
-
-      {/* ================= MODALS ================= */}
-
-      {/* + New Document Upload Modal */}
-      <UploadModal
-        isOpen={uploadModalOpen}
-        onClose={() => setUploadModalOpen(false)}
-        onSuccess={handleUploadSuccess}
-        activeUser={activeUser}
-        lang={lang}
-      />
-
-      {/* M-of-N Quorum Modal */}
-      {activeQuorumDoc && (
+      {quorumModalOpen && activeQuorumDoc && (
         <QuorumModal
           isOpen={quorumModalOpen}
           onClose={() => setQuorumModalOpen(false)}
           document={activeQuorumDoc}
           activeUser={activeUser}
           onVoteSuccess={handleVoteSuccess}
-          onSwitchUser={handleSwitchUserById}
-          lang={lang}
         />
       )}
+
+      {shortcutsOpen && (
+        <ShortcutsModal
+          isOpen={shortcutsOpen}
+          onClose={() => setShortcutsOpen(false)}
+          onToggleDarkMode={() => setDarkMode(prev => !prev)}
+          onNavigateHome={() => {
+            setCurrentTab('home');
+            setSelectedDoc(null);
+            setShortcutsOpen(false);
+          }}
+          onNavigateLogin={() => {
+            setCurrentTab('login');
+            setSelectedDoc(null);
+            setShortcutsOpen(false);
+          }}
+          onOpenSearch={() => {
+            setShortcutsOpen(false);
+            const searchInput = document.querySelector('input[type="text"], input[type="search"]');
+            if (searchInput) searchInput.focus();
+          }}
+        />
+      )}
+
+      {/* Floating Back to Top Button (Section 14) */}
+      <BackToTop />
 
     </div>
   );

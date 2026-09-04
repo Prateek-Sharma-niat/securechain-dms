@@ -9,211 +9,265 @@ import {
   CheckCircle2, 
   Globe,
   Award,
-  Lock
+  Lock,
+  Eye,
+  Users
 } from 'lucide-react';
 import { translations } from '../i18n/translations';
 
 /**
- * Official Government Footer (Light & Dark Theme)
- * Complete with multi-column ministry links, statutory compliance, GIGW 3.0 standards,
- * emergency hotlines, and national tricolor bottom border.
+ * Government-Standard Footer per Master Spec Section 21
+ * Compliant with GIGW (Government of India Guidelines for Websites)
+ * Supports both Light (#FFF9F2 / #FFFFFF) and Dark (#12161C / #1A1F29) themes
+ * Completely bilingual (English / हिन्दी)
+ * Zero references to "Cyber Crime"
  */
 export default function Footer({ lang = 'en' }) {
   const t = translations[lang] || translations.en;
+  const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 text-xs select-none transition-colors">
+    <footer className="bg-white dark:bg-[#12161C] border-t border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 text-xs select-none transition-colors w-full">
       
-      {/* 1. National Helpline Micro-Bar */}
-      <div className="bg-[#FFF3E6] dark:bg-slate-950 border-b border-orange-200/80 dark:border-slate-800/80 px-4 sm:px-8 py-3">
-        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#FF6A1A] animate-pulse"></span>
-            <span className="font-bold text-slate-800 dark:text-slate-200 text-xs">
-              National Emergency & Citizen Assistance Directory:
-            </span>
-          </div>
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-semibold">
-            <span className="flex items-center gap-1.5 text-rose-700 dark:text-rose-400">
-              <PhoneCall className="w-3.5 h-3.5" />
-              <span>National Emergency: <strong>112</strong></span>
-            </span>
-            <span className="flex items-center gap-1.5 text-amber-700 dark:text-amber-400">
-              <PhoneCall className="w-3.5 h-3.5" />
-              <span>Cyber Financial Fraud: <strong>1930</strong></span>
-            </span>
-            <span className="flex items-center gap-1.5 text-purple-700 dark:text-purple-400">
-              <PhoneCall className="w-3.5 h-3.5" />
-              <span>Women Helpline: <strong>1090</strong></span>
-            </span>
-            <span className="flex items-center gap-1.5 text-blue-700 dark:text-blue-400">
-              <PhoneCall className="w-3.5 h-3.5" />
-              <span>Free Legal Aid (NALSA): <strong>15100</strong></span>
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* 2. Multi-Column Government Directory */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-8 py-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 pb-8 border-b border-slate-100 dark:border-slate-800">
+      {/* 1. Four-Column Link Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 py-10 sm:py-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10 pb-10 border-b border-slate-100 dark:border-slate-800/80">
           
-          {/* Column 1: MHA & Lead Agency */}
+          {/* Column 1: About */}
           <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <span className="text-xl">🇮🇳</span>
-              <h4 className="text-xs font-extrabold text-slate-900 dark:text-slate-100 uppercase tracking-wider">
-                Government of India
-              </h4>
+            <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider flex items-center gap-1.5 pb-1 border-b border-orange-200 dark:border-orange-800/40">
+              <Shield className="w-3.5 h-3.5 text-[#FF6A1A]" />
+              <span>{lang === 'hi' ? 'पोर्टल के बारे में' : 'About'}</span>
+            </h4>
+            <ul className="space-y-2 text-[11px]">
+              <li>
+                <a href="#about" className="hover:text-[#FF6A1A] transition-colors">
+                  {lang === 'hi' ? 'पोर्टल का परिचय' : 'About the Portal'}
+                </a>
+              </li>
+              <li>
+                <a href="#contact" className="hover:text-[#FF6A1A] transition-colors">
+                  {lang === 'hi' ? 'हमसे संपर्क करें' : 'Contact Us'}
+                </a>
+              </li>
+              <li>
+                <a href="#sitemap" className="hover:text-[#FF6A1A] transition-colors">
+                  {lang === 'hi' ? 'साइटमैप' : 'Sitemap'}
+                </a>
+              </li>
+              <li>
+                <a href="#terms" className="hover:text-[#FF6A1A] transition-colors">
+                  {lang === 'hi' ? 'उपयोग की शर्तें' : 'Terms of Use'}
+                </a>
+              </li>
+              <li>
+                <a href="#privacy" className="hover:text-[#FF6A1A] transition-colors">
+                  {lang === 'hi' ? 'गोपनीयता नीति' : 'Privacy Policy'}
+                </a>
+              </li>
+              <li>
+                <a href="#accessibility" className="hover:text-[#FF6A1A] transition-colors">
+                  {lang === 'hi' ? 'सुलभता विवरण' : 'Accessibility Statement'}
+                </a>
+              </li>
+              <li>
+                <a href="#copyright" className="hover:text-[#FF6A1A] transition-colors">
+                  {lang === 'hi' ? 'कॉपीराइट नीति' : 'Copyright Policy'}
+                </a>
+              </li>
+              <li>
+                <a href="#disclaimer" className="hover:text-[#FF6A1A] transition-colors">
+                  {lang === 'hi' ? 'अस्वीकरण' : 'Disclaimer'}
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 2: Related Links */}
+          <div className="space-y-3">
+            <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider flex items-center gap-1.5 pb-1 border-b border-sky-200 dark:border-sky-800/40">
+              <Building2 className="w-3.5 h-3.5 text-[#4FA8E0]" />
+              <span>{lang === 'hi' ? 'संबंधित आधिकारिक लिंक' : 'Related Links'}</span>
+            </h4>
+            <ul className="space-y-2 text-[11px]">
+              <li>
+                <a href="https://mha.gov.in" target="_blank" rel="noreferrer" className="hover:text-[#4FA8E0] transition-colors flex items-center justify-between group">
+                  <span>{lang === 'hi' ? 'गृह मंत्रालय' : 'Ministry of Home Affairs'}</span>
+                  <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-[#4FA8E0]" />
+                </a>
+              </li>
+              <li>
+                <a href="https://digitalindia.gov.in" target="_blank" rel="noreferrer" className="hover:text-[#4FA8E0] transition-colors flex items-center justify-between group">
+                  <span>{lang === 'hi' ? 'डिजिटल इंडिया' : 'Digital India'}</span>
+                  <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-[#4FA8E0]" />
+                </a>
+              </li>
+              <li>
+                <a href="https://mygov.in" target="_blank" rel="noreferrer" className="hover:text-[#4FA8E0] transition-colors flex items-center justify-between group">
+                  <span>{lang === 'hi' ? 'माईगॉव (MyGov)' : 'MyGov Platform'}</span>
+                  <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-[#4FA8E0]" />
+                </a>
+              </li>
+              <li>
+                <a href="https://india.gov.in" target="_blank" rel="noreferrer" className="hover:text-[#4FA8E0] transition-colors flex items-center justify-between group">
+                  <span>{lang === 'hi' ? 'भारत का राष्ट्रीय पोर्टल' : 'National Portal of India'}</span>
+                  <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-[#4FA8E0]" />
+                </a>
+              </li>
+              <li>
+                <a href="https://ncrb.gov.in" target="_blank" rel="noreferrer" className="hover:text-[#4FA8E0] transition-colors flex items-center justify-between group">
+                  <span>{lang === 'hi' ? 'राष्ट्रीय अपराध रिकॉर्ड ब्यूरो (NCRB)' : 'National Crime Records Bureau'}</span>
+                  <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-[#4FA8E0]" />
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 3: Help & Grievance */}
+          <div className="space-y-3">
+            <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider flex items-center gap-1.5 pb-1 border-b border-emerald-200 dark:border-emerald-800/40">
+              <PhoneCall className="w-3.5 h-3.5 text-[#5FA777]" />
+              <span>{lang === 'hi' ? 'सहायता एवं शिकायत निवारण' : 'Help & Grievance'}</span>
+            </h4>
+            <ul className="space-y-2.5 text-[11px]">
+              <li className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#1A1F29] border border-slate-200/80 dark:border-slate-800">
+                <span className="block font-semibold text-slate-700 dark:text-slate-300">
+                  {lang === 'hi' ? 'राष्ट्रीय आपातकालीन हेल्पलाइन' : 'National Emergency Helpline'}:
+                </span>
+                <span className="font-mono text-xs font-bold text-[#FF6A1A]">112 (24x7 Toll Free)</span>
+              </li>
+              <li className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#1A1F29] border border-slate-200/80 dark:border-slate-800">
+                <span className="block font-semibold text-slate-700 dark:text-slate-300">
+                  {lang === 'hi' ? 'निःशुल्क कानूनी सहायता (NALSA)' : 'Free Legal Aid (NALSA)'}:
+                </span>
+                <span className="font-mono text-xs font-bold text-sky-600 dark:text-sky-400">15100</span>
+              </li>
+              <li>
+                <a href="#faqs" className="hover:text-[#5FA777] transition-colors block">
+                  {lang === 'hi' ? 'अक्सर पूछे जाने वाले प्रश्न (FAQs)' : 'Frequently Asked Questions (FAQs)'}
+                </a>
+              </li>
+              <li>
+                <a href="#feedback" className="hover:text-[#5FA777] transition-colors block">
+                  {lang === 'hi' ? 'नागरिक प्रतिपुष्टि (Feedback)' : 'Citizen Feedback & Suggestions'}
+                </a>
+              </li>
+              <li>
+                <a href="https://rtionline.gov.in" target="_blank" rel="noreferrer" className="hover:text-[#5FA777] transition-colors flex items-center justify-between group">
+                  <span>{lang === 'hi' ? 'सूचना का अधिकार (RTI)' : 'Right to Information (RTI Online)'}</span>
+                  <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-[#5FA777]" />
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 4: Connect With Us & Metrics */}
+          <div className="space-y-3">
+            <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider flex items-center gap-1.5 pb-1 border-b border-purple-200 dark:border-purple-800/40">
+              <Users className="w-3.5 h-3.5 text-purple-500" />
+              <span>{lang === 'hi' ? 'हमसे जुड़ें एवं सांख्यिकी' : 'Connect With Us'}</span>
+            </h4>
+            
+            {/* Social Icons */}
+            <div className="flex items-center space-x-2 pt-1">
+              <a 
+                href="https://twitter.com" 
+                target="_blank" 
+                rel="noreferrer"
+                className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-[#1A1F29] border border-slate-200 dark:border-slate-800 hover:border-sky-400 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-sky-500 transition-colors cursor-pointer"
+                title="Twitter / X"
+              >
+                <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+              </a>
+              <a 
+                href="https://facebook.com" 
+                target="_blank" 
+                rel="noreferrer"
+                className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-[#1A1F29] border border-slate-200 dark:border-slate-800 hover:border-blue-500 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-blue-600 transition-colors cursor-pointer"
+                title="Facebook"
+              >
+                <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                </svg>
+              </a>
+              <a 
+                href="https://youtube.com" 
+                target="_blank" 
+                rel="noreferrer"
+                className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-[#1A1F29] border border-slate-200 dark:border-slate-800 hover:border-red-500 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-red-600 transition-colors cursor-pointer"
+                title="YouTube"
+              >
+                <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                </svg>
+              </a>
             </div>
-            <p className="text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
-              <strong>Ministry of Home Affairs (MHA)</strong><br />
-              North Block, Central Secretariat,<br />
-              New Delhi, Delhi 110001, India
+
+            {/* Visitors Count Widget */}
+            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-[#1A1F29] border border-slate-200/80 dark:border-slate-800 space-y-1">
+              <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                <span>{lang === 'hi' ? 'कुल आगंतुक संख्या' : 'Visitors Count'}:</span>
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              </div>
+              <div className="font-mono text-sm font-black text-slate-900 dark:text-slate-100 tracking-wider bg-white dark:bg-[#12161C] px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700 text-center">
+                0 4 , 8 2 9 , 1 5 6
+              </div>
+            </div>
+
+            {/* Last Updated Line */}
+            <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
+              {lang === 'hi' ? 'अंतिम अद्यतन' : 'Last Updated'}: 04 September 2026
+            </div>
+
+          </div>
+
+        </div>
+
+        {/* 2. Compliance / Credentials Row */}
+        <div className="py-6 border-b border-slate-100 dark:border-slate-800/80 flex flex-col md:flex-row items-center justify-between gap-4 text-[11px] text-slate-500 dark:text-slate-400 text-center md:text-left">
+          <div className="space-y-1">
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
+              <span className="inline-flex items-center gap-1 font-semibold text-slate-700 dark:text-slate-300">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Compliant with GIGW (Government of India Guidelines for Websites)</span>
+              </span>
+              <span className="hidden sm:inline text-slate-300 dark:text-slate-700">•</span>
+              <span>Best viewed in latest versions of Chrome, Firefox, Edge</span>
+            </div>
+            <p className="text-[10px] text-slate-400 dark:text-slate-500">
+              Designed, Developed & Hosted by National Informatics Centre (NIC) — Content Owned & Maintained by Ministry of Home Affairs, Government of India.
             </p>
-            <div className="text-[11px] space-y-1 text-slate-500 dark:text-slate-400 pt-1">
-              <div>Portal: <a href="https://mha.gov.in" target="_blank" rel="noreferrer" className="text-[#FF6A1A] hover:underline">mha.gov.in</a></div>
-              <div>National Portal: <a href="https://india.gov.in" target="_blank" rel="noreferrer" className="text-[#FF6A1A] hover:underline">india.gov.in</a></div>
+          </div>
+
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-[#1A1F29] border border-slate-200 dark:border-slate-700 text-[10px] font-bold text-slate-700 dark:text-slate-300">
+              ISO/IEC 27001 Certified
+            </div>
+            <div className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-[#1A1F29] border border-slate-200 dark:border-slate-700 text-[10px] font-bold text-slate-700 dark:text-slate-300">
+              BSA §63 / $65B Validated
             </div>
           </div>
-
-          {/* Column 2: Interoperable Portals */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-extrabold text-slate-900 dark:text-slate-100 uppercase tracking-wider flex items-center gap-1.5">
-              <Building2 className="w-3.5 h-3.5 text-[#FF6A1A]" />
-              <span>Related Official Portals</span>
-            </h4>
-            <ul className="space-y-1.5 text-[11px]">
-              <li>
-                <a href="https://ncrb.gov.in" target="_blank" rel="noreferrer" className="hover:text-[#FF6A1A] flex items-center justify-between group">
-                  <span>National Crime Records Bureau (NCRB)</span>
-                  <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-[#FF6A1A]" />
-                </a>
-              </li>
-              <li>
-                <a href="https://ecourts.gov.in" target="_blank" rel="noreferrer" className="hover:text-[#FF6A1A] flex items-center justify-between group">
-                  <span>eCourts Services Mission Mode Project</span>
-                  <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-[#FF6A1A]" />
-                </a>
-              </li>
-              <li>
-                <a href="https://cybercrime.gov.in" target="_blank" rel="noreferrer" className="hover:text-[#FF6A1A] flex items-center justify-between group">
-                  <span>National Cyber Crime Reporting Portal</span>
-                  <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-[#FF6A1A]" />
-                </a>
-              </li>
-              <li>
-                <a href="https://doj.gov.in" target="_blank" rel="noreferrer" className="hover:text-[#FF6A1A] flex items-center justify-between group">
-                  <span>Department of Justice (DoJ)</span>
-                  <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-[#FF6A1A]" />
-                </a>
-              </li>
-              <li>
-                <a href="https://dfs.gov.in" target="_blank" rel="noreferrer" className="hover:text-[#FF6A1A] flex items-center justify-between group">
-                  <span>Directorate of Forensic Science Services</span>
-                  <ExternalLink className="w-3 h-3 text-slate-400 group-hover:text-[#FF6A1A]" />
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          {/* Column 3: Statutory Criminal Acts */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-extrabold text-slate-900 dark:text-slate-100 uppercase tracking-wider flex items-center gap-1.5">
-              <Scale className="w-3.5 h-3.5 text-sky-600" />
-              <span>Statutory Legal Framework</span>
-            </h4>
-            <ul className="space-y-1.5 text-[11px]">
-              <li className="text-slate-700 dark:text-slate-300 font-medium">
-                Bharatiya Sakshya Adhiniyam (BSA), 2023
-                <span className="block text-[10px] text-slate-400 font-normal">Section 63 (Electronic Evidence Admissibility)</span>
-              </li>
-              <li className="text-slate-700 dark:text-slate-300 font-medium">
-                Bharatiya Nagarik Suraksha Sanhita (BNSS), 2023
-                <span className="block text-[10px] text-slate-400 font-normal">Section 173 (Information in Cognizable Cases & e-FIR)</span>
-              </li>
-              <li className="text-slate-700 dark:text-slate-300 font-medium">
-                Bharatiya Nyaya Sanhita (BNS), 2023
-                <span className="block text-[10px] text-slate-400 font-normal">Substantive Penal Provisions & Evidence Preservation</span>
-              </li>
-              <li className="text-slate-700 dark:text-slate-300 font-medium">
-                Information Technology Act, 2000
-                <span className="block text-[10px] text-slate-400 font-normal">Section 65B & Section 79A Examiner Certification</span>
-              </li>
-            </ul>
-          </div>
-
-          {/* Column 4: Standards & Accessibility */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-extrabold text-slate-900 dark:text-slate-100 uppercase tracking-wider flex items-center gap-1.5">
-              <Award className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Standards & Compliance</span>
-            </h4>
-            <div className="space-y-2 text-[11px]">
-              <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-800 space-y-1">
-                <div className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>GIGW 3.0 Certified</span>
-                </div>
-                <div className="text-[10px] text-slate-500 dark:text-slate-400">
-                  Compliant with Guidelines for Indian Government Websites & WCAG 2.1 Level AA.
-                </div>
-              </div>
-
-              <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-800 space-y-1">
-                <div className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                  <Lock className="w-3.5 h-3.5 text-purple-600" />
-                  <span>ISO/IEC 27037:2012</span>
-                </div>
-                <div className="text-[10px] text-slate-500 dark:text-slate-400">
-                  Guidelines for identification, collection, acquisition and preservation of digital evidence.
-                </div>
-              </div>
-            </div>
-          </div>
-
         </div>
 
-        {/* 3. Mandatory Policy Links Row */}
-        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-slate-600 dark:text-slate-400 text-xs font-medium py-5 border-b border-slate-100 dark:border-slate-800">
-          <a href="#terms" className="hover:text-[#FF6A1A] transition-colors">{t.footerPolicyTerms}</a>
-          <span className="text-slate-300 dark:text-slate-700">•</span>
-          <a href="#privacy" className="hover:text-[#FF6A1A] transition-colors">{t.footerPolicyPrivacy}</a>
-          <span className="text-slate-300 dark:text-slate-700">•</span>
-          <a href="#hyperlink" className="hover:text-[#FF6A1A] transition-colors">{t.footerPolicyHyperlink}</a>
-          <span className="text-slate-300 dark:text-slate-700">•</span>
-          <a href="#copyright" className="hover:text-[#FF6A1A] transition-colors">{t.footerPolicyCopyright}</a>
-          <span className="text-slate-300 dark:text-slate-700">•</span>
-          <a href="#accessibility" className="hover:text-[#FF6A1A] transition-colors">{t.footerPolicyAccessibility}</a>
-          <span className="text-slate-300 dark:text-slate-700">•</span>
-          <a href="https://pgportal.gov.in" target="_blank" rel="noreferrer" className="hover:text-[#FF6A1A] transition-colors">CPGRAMS Grievance Portal</a>
-          <span className="text-slate-300 dark:text-slate-700">•</span>
-          <a href="https://rtionline.gov.in" target="_blank" rel="noreferrer" className="hover:text-[#FF6A1A] transition-colors">RTI Online</a>
-        </div>
-
-        {/* 4. Attribution & Sovereign Hosting */}
-        <div className="text-center pt-5 space-y-1.5 text-slate-500 dark:text-slate-400 text-[11px]">
-          <p>
-            Website Content Managed by <strong>Ministry of Home Affairs, Government of India</strong>
-          </p>
-          <p>
-            Designed, Developed and Hosted by <strong>National Informatics Centre (NIC)</strong>, Ministry of Electronics & Information Technology
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-3 pt-1 text-[10px] text-slate-400 font-mono">
-            <span>SecureChain DMS Release 2.4.0</span>
-            <span>•</span>
-            <span>Last Reviewed & Updated: <strong>03-Sep-2026</strong></span>
-            <span>•</span>
-            <span className="text-emerald-600 font-bold">256-Bit HSM Sovereign Vault Active</span>
+        {/* 3. Final Bottom Bar & Bookend Tricolor Strip */}
+        <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-slate-400 dark:text-slate-500">
+          <div>
+            © {currentYear} Ministry of Home Affairs, Government of India. All Rights Reserved.
+          </div>
+          <div className="text-[10px] font-mono">
+            SecureChain DMS • Release v2.4.0 (National Sovereign Edition)
           </div>
         </div>
+
       </div>
 
-      {/* 5. Indian Tricolor Bottom Border */}
-      <div className="w-full h-[6px] flex">
-        <div className="w-1/3 bg-[#FF9933]"></div>
-        <div className="w-1/3 bg-[#FFFFFF]"></div>
-        <div className="w-1/3 bg-[#138808]"></div>
+      {/* Bookend Tricolor Strip matching header flag banner styling */}
+      <div className="w-full flex h-1.5">
+        <div className="flex-1 bg-[#FF6A1A]"></div>
+        <div className="flex-1 bg-white"></div>
+        <div className="flex-1 bg-[#5FA777]"></div>
       </div>
 
     </footer>

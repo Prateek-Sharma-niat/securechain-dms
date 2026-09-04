@@ -1,4 +1,5 @@
 const { sha256, createGenesisBlock, createBlock, verifyChain, calculateBlockHash } = require('../ledger/hashChain');
+const { encryptAtRest, decryptOnTheFly } = require('../ledger/encryption');
 const wormAudit = require('../ledger/wormAudit');
 const quorumEngine = require('../ledger/quorumEngine');
 const { DEMO_PERSONAS, SEED_CITIZENS, SEED_CASES } = require('./seedData');
@@ -83,6 +84,15 @@ class DataStore {
       doc.payloadHash = block.payloadHash;
       doc.previousHash = block.previousHash;
       doc.lockedAt = block.timestamp;
+      
+      // Master Spec Section 20.1: AES-256 Encryption at Rest
+      doc.encryption = encryptAtRest({
+        id: doc.id,
+        firNo: doc.firNo,
+        incidentSummary: doc.incidentSummary,
+        actsAndSections: doc.actsAndSections
+      });
+
       this.documents.set(doc.id, doc);
 
       // Append WORM Audit Logs for this ingestion
@@ -313,6 +323,14 @@ class DataStore {
     newDoc.previousHash = block.previousHash;
     newDoc.lockedAt = block.timestamp;
 
+    // Master Spec Section 20.1: AES-256 Encryption at Rest
+    newDoc.encryption = encryptAtRest({
+      id: newDoc.id,
+      firNo: newDoc.firNo,
+      incidentSummary: newDoc.incidentSummary,
+      actsAndSections: newDoc.actsAndSections
+    });
+
     this.documents.set(id, newDoc);
 
     // WORM Log entries
@@ -395,7 +413,7 @@ class DataStore {
       summaryDiff: editData.editSummary || "Supplementary findings submitted for multi-party quorum review."
     });
 
-    // Create Quorum Session (2 of 3)
+    // Create Quorum Session with severity-based pool routing (Section 20.2)
     const approvers = DEMO_PERSONAS.filter(p => p.canApprove);
     const session = quorumEngine.createSession({
       docId,
@@ -404,12 +422,13 @@ class DataStore {
       requesterName: requester.name,
       requesterRole: requester.role,
       editSummary: editData.editSummary || "Request for supplementary FIR amendments",
-      threshold: 2,
-      totalEligible: 3,
+      severityText: `${doc.actsAndSections || ''} ${doc.caseTitle || ''} ${doc.incidentSummary || ''} ${editData.editSummary || ''}`,
       eligibleApprovers: approvers
     });
 
     doc.quorumSession = session;
+    doc.sensitivityTier = session.pool === 'STATE_LEVEL' ? 'HIGH' : (session.threshold === 1 ? 'LOW' : 'MEDIUM');
+    doc.jurisdictionalPool = session.poolLabel;
 
     // Log to WORM
     wormAudit.append({

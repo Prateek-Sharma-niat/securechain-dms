@@ -28,14 +28,21 @@ import {
   Landmark,
   FileSpreadsheet,
   BadgeCheck,
-  Scale3D,
   PhoneCall
 } from 'lucide-react';
 import { translations } from '../i18n/translations';
 
+/**
+ * Pure Informational Landing Page per Master Spec Section 3:
+ * - Purely informational / educational / marketing
+ * - NO per-role login cards or role selector buttons
+ * - Single 'Login' button affordance leading to /login
+ * - Plain language outcomes, zero internal technical jargon in headlines
+ * - Zero references to "Cyber Crime"
+ * - Dark mode and full bilingual support
+ */
 export default function LandingPage({ 
   onGoToLogin, 
-  onGoToCitizen,
   activeUser, 
   metrics,
   lang = 'en'
@@ -45,80 +52,80 @@ export default function LandingPage({
 
   const tickerAdvisories = [
     "Government Gazette: Bharatiya Sakshya Adhiniyam (BSA), 2023 Section 63 electronic certification is now mandatory for court exhibits.",
-    "National Standard: Bharatiya Nagarik Suraksha Sanhita (BNSS), 2023 Section 173 e-FIR records are sealed with SHA-256 integrity.",
-    "Integrity Mandate: Amendments to case records require 2-of-3 independent multi-cadre consensus under Rule 12 Evidence Standards.",
-    "Citizen Alert: National Cyber Crime Helpline 1930 is operational 24x7 for immediate financial freeze and grievance lodging."
+    "National Standard: Bharatiya Nagarik Suraksha Sanhita (BNSS), 2023 Section 173 e-FIR records are secured with permanent digital verification.",
+    "Integrity Mandate: Amendments to case records require 2-of-3 independent multi-cadre consensus under statutory evidence rules.",
+    "Citizen Alert: National Emergency Helpline 112 and Free Legal Aid 15100 are operational 24x7 across all states and union territories."
   ];
 
   const statItems = [
     {
       id: 'firs',
-      label: lang === 'hi' ? 'सील किए गए केस' : 'Sealed Legal Dockets',
-      val: metrics?.totalDocuments ? `${metrics.totalDocuments} FIRs` : '100% Sealed',
+      label: lang === 'hi' ? 'सील किए गए केस' : 'Secured Case Records',
+      val: metrics?.totalDocuments ? `${metrics.totalDocuments} Records` : '100% Locked',
       sub: lang === 'hi' ? 'शून्य अनधिकृत फेरबदल' : 'Zero unapproved alterations',
       icon: Shield,
       color: 'text-orange-500 bg-orange-50 dark:bg-orange-950/40 border-orange-200 dark:border-orange-900',
-      hoverDetail: 'Every registered FIR is immutable under Ministry of Home Affairs evidentiary standards.'
+      hoverDetail: 'Every registered FIR is tamper-evident under Ministry of Home Affairs evidentiary standards.'
     },
     {
       id: 'blocks',
-      label: lang === 'hi' ? 'क्रिप्टोग्राफिक ब्लॉक्स' : 'Chained Proof Blocks',
-      val: metrics?.totalBlocks ? `${metrics.totalBlocks} Blocks` : '14 Blocks',
-      sub: lang === 'hi' ? 'परस्पर जुड़े SHA-256 हैश' : 'Interlinked SHA-256 Merkle chain',
+      label: lang === 'hi' ? 'सुरक्षित लेज़र प्रविष्टियां' : 'Chained Proof Entries',
+      val: metrics?.totalBlocks ? `${metrics.totalBlocks} Entries` : '14 Verified',
+      sub: lang === 'hi' ? 'परस्पर जुड़ा डिजिटल लेज़र' : 'Interlinked permanent custody ledger',
       icon: Database,
       color: 'text-sky-500 bg-sky-50 dark:bg-sky-950/40 border-sky-200 dark:border-sky-900',
-      hoverDetail: 'Each block cryptographically references its predecessor for mathematical tamper proofing.'
+      hoverDetail: 'Each entry mathematically anchors to its predecessor for unalterable proof of sequence.'
     },
     {
       id: 'quorum',
-      label: lang === 'hi' ? 'बहु-अधिकारी सत्यापन' : 'Multi-Cadre Reviews',
+      label: lang === 'hi' ? 'बहु-अधिकारी सत्यापन' : 'Multi-Officer Reviews',
       val: '2-of-3 Quorum',
-      sub: lang === 'hi' ? 'स्वतंत्र 3-अधिकारी समीक्षा' : 'Strict separation of powers',
+      sub: lang === 'hi' ? 'स्वतंत्र समीक्षा मंडल' : 'Strict separation of powers',
       icon: FileCheck2,
       color: 'text-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900',
-      hoverDetail: 'No individual officer can approve their own record amendment without peer consensus.'
+      hoverDetail: 'No individual official can approve their own record amendment without independent peer review.'
     },
     {
       id: 'compliance',
       label: lang === 'hi' ? 'न्यायालयीन अनुपालन' : 'Court Admissibility',
-      val: 'BSA §63 / 65B',
-      sub: lang === 'hi' ? 'स्वतः इलेक्ट्रॉनिक प्रमाणपत्र' : 'Automated forensic audit certificate',
+      val: 'BSA §63 / $65B',
+      sub: lang === 'hi' ? 'स्वतः कानूनी प्रमाणपत्र' : 'Automated evidentiary certificate',
       icon: Scale,
       color: 'text-purple-500 bg-purple-50 dark:bg-purple-950/40 border-purple-200 dark:border-purple-900',
-      hoverDetail: 'High-court approved evidentiary chain-of-custody format for swift judicial prosecution.'
+      hoverDetail: 'High-court approved evidentiary chain-of-custody format for swift judicial scrutiny.'
     }
   ];
 
   const institutionalWings = [
     {
-      title: "Law Enforcement Cadre",
+      title: "Law Enforcement Agency",
       ministry: "Ministry of Home Affairs",
       description: "First Information Reports (CrPC 154 / BNSS 173), seizure memos, and panchnama dockets sealed at inception.",
-      tag: "Police / CID / CBI",
+      tag: "Police / CID / Central Agencies",
       color: "border-orange-200 dark:border-orange-900 bg-orange-50/50 dark:bg-slate-900",
       accent: "text-[#FF6A1A]"
     },
     {
-      title: "Judicial Magistrate Wing",
+      title: "Judicial Magistrate Court",
       ministry: "Department of Justice",
-      description: "Direct court scrutiny, remands, bail records, and Section 65B / BSA Section 63 cryptographic admissibility verification.",
-      tag: "Sessions & High Courts",
+      description: "Direct court scrutiny, remands, bail records, and Section 65B / BSA Section 63 digital admissibility verification.",
+      tag: "District, Sessions & High Courts",
       color: "border-sky-200 dark:border-sky-900 bg-sky-50/50 dark:bg-slate-900",
       accent: "text-sky-600 dark:text-sky-400"
     },
     {
       title: "Forensic Laboratories",
       ministry: "DFSS / CFSL / RFSL",
-      description: "Raw bitstream dumps, acoustic spectrograms, toxicological exhibits, and digital hash chains sealed under ISO/IEC 17025.",
-      tag: "Forensic Scientists",
+      description: "Physical exhibit extractions, DNA analysis reports, chemical examinations, and digital evidence custody seals.",
+      tag: "Forensic Experts",
       color: "border-emerald-200 dark:border-emerald-900 bg-emerald-50/50 dark:bg-slate-900",
       accent: "text-emerald-600 dark:text-emerald-400"
     },
     {
-      title: "Statutory Audit Directorate",
-      ministry: "Comptroller & Auditor General / MHA",
-      description: "WORM write-once ledger oversight, Merkle root verification, and independent Sentinel intrusion tamper detection.",
-      tag: "Independent Auditors",
+      title: "Statutory Audit Authority",
+      ministry: "Independent Audit Directorate / MHA",
+      description: "Permanent write-once ledger oversight, system-wide integrity checks, and emergency override review.",
+      tag: "Certified Auditors",
       color: "border-purple-200 dark:border-purple-900 bg-purple-50/50 dark:bg-slate-900",
       accent: "text-purple-600 dark:text-purple-400"
     }
@@ -126,28 +133,28 @@ export default function LandingPage({
 
   const legalActs = [
     {
-      code: "BSA §63",
+      code: "BSA §63 / $65B",
       name: "Bharatiya Sakshya Adhiniyam, 2023",
       section: "Section 63 (Admissibility of Electronic Records)",
-      detail: "Replaces Section 65B of Indian Evidence Act 1872. Codifies automated cryptographic hashing, device provenance, and custodian signatures for direct courtroom trial presentation."
+      detail: "Replaces Section 65B of Indian Evidence Act 1872. Codifies automated digital verification, device provenance, and custodian signatures for direct courtroom presentation."
     },
     {
       code: "BNSS §173",
       name: "Bharatiya Nagarik Suraksha Sanhita, 2023",
-      section: "Section 173 (Electronic Information in Cognizable Crimes)",
-      detail: "Mandates electronic lodging of FIRs (e-FIR) and digital case diary recording. Requires tamper-evident timestamps within 3 days of complaint filing."
+      section: "Section 173 (Information in Cognizable Offenses)",
+      detail: "Mandates electronic lodging of FIRs and digital case diary recording. Requires tamper-evident registration of evidence dockets."
     },
     {
       code: "IT Act §79A",
       name: "Information Technology Act, 2000",
       section: "Section 79A & Central Examiner Accreditation",
-      detail: "Empowers the Central Government to notify accredited examiners of electronic evidence, ensuring cryptographic tools follow verifiable mathematical standards."
+      detail: "Empowers the Central Government to notify accredited examiners of electronic records, ensuring verification tools adhere to rigorous standards."
     },
     {
       code: "DPDP 2023",
       name: "Digital Personal Data Protection Act, 2023",
-      section: "Section 7 & 8 (Law Enforcement Sovereign Exemption)",
-      detail: "Preserves victim and witness privacy with pseudonymous review queues while ensuring lawful state processing under statutory security safeguards."
+      section: "Section 7 & 8 (Statutory Sovereign Exemptions)",
+      detail: "Preserves victim and witness privacy with pseudonymous review pools while ensuring lawful state processing under statutory safeguards."
     }
   ];
 
@@ -158,7 +165,7 @@ export default function LandingPage({
       <div className="bg-[#FFF3E6] dark:bg-slate-900/80 border-b border-orange-200/80 dark:border-slate-800 px-4 sm:px-8 py-2 text-xs flex items-center space-x-3 overflow-hidden select-none">
         <div className="flex items-center gap-1.5 font-bold text-[#FF6A1A] uppercase tracking-wider flex-shrink-0 bg-white dark:bg-slate-800 px-2.5 py-1 rounded-md border border-orange-300 dark:border-orange-800/60 shadow-xs">
           <Bell className="w-3.5 h-3.5 animate-bounce" />
-          <span>{lang === 'hi' ? 'ताज़ा सूचना' : "Gazette Advisory"}</span>
+          <span>{lang === 'hi' ? 'ताज़ा सूचना' : "Official Gazette"}</span>
         </div>
         <div className="overflow-hidden whitespace-nowrap text-slate-700 dark:text-slate-300 font-medium text-xs">
           <div className="inline-block animate-marquee pl-4">
@@ -167,52 +174,52 @@ export default function LandingPage({
         </div>
       </div>
 
-      {/* 2. Hero Section */}
-      <section className="px-4 sm:px-8 pt-10 sm:pt-14 pb-10 max-w-7xl mx-auto w-full">
-        <div className="text-center max-w-3xl mx-auto space-y-5">
+      {/* 2. Hero Section (Single unified Login entry point per Section 3) */}
+      <section className="px-4 sm:px-8 pt-12 sm:pt-16 pb-12 max-w-7xl mx-auto w-full">
+        <div className="text-center max-w-3xl mx-auto space-y-6">
           
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-100 dark:bg-orange-950/60 border border-orange-300 dark:border-orange-800/80 text-[#FF6A1A] text-xs font-bold shadow-xs">
             <Shield className="w-3.5 h-3.5" />
-            <span>National Sovereign Legal Evidence Architecture • Government of India</span>
+            <span>National Digital Evidence Architecture • Ministry of Home Affairs</span>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
-            Cryptographic Integrity for <br className="hidden sm:inline" />
-            <span className="text-[#FF6A1A]">Police Records & Legal Evidence</span>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight font-serif">
+            Digital Integrity for <br className="hidden sm:inline" />
+            <span className="text-[#FF6A1A]">Police Records & Case Evidence</span>
           </h1>
 
-          <p className="text-xs sm:text-sm md:text-base text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl mx-auto">
-            SecureChain DMS establishes a tamper-evident digital chain of custody for FIRs, forensic exhibits, and judicial records. Certified under the Bharatiya Sakshya Adhiniyam (BSA) 2023, BNSS 2023, and ISO/IEC 27037 standards.
+          <p className="text-xs sm:text-sm md:text-base text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl mx-auto font-sans">
+            A national platform for managing investigation and legal documents — FIRs, chargesheets, forensic reports, and court exhibits. Built so no single official can alter a legal record without instant notification and multi-officer approval.
           </p>
 
-          {/* Primary Action Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-3">
+          {/* SINGLE Unified Login CTA (per Master Spec Section 3) */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-3">
             <button
-              onClick={onGoToCitizen}
-              className="w-full sm:w-auto px-7 py-3.5 bg-gradient-to-r from-[#FF6A1A] to-[#FF8C42] hover:from-[#E85B0E] text-white font-bold text-xs sm:text-sm rounded-2xl shadow-lg hover:shadow-orange-500/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2.5 cursor-pointer"
+              onClick={() => onGoToLogin('CITIZEN')}
+              className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-[#FF6A1A] to-[#FF8C42] hover:from-[#E85B0E] text-white font-bold text-xs sm:text-sm rounded-2xl shadow-lg hover:shadow-orange-500/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2.5 cursor-pointer"
             >
-              <UserCheck className="w-4 h-4" />
-              <span>Check Crime Record & Complaint Status</span>
+              <Lock className="w-4 h-4" />
+              <span>Login to SecureChain DMS</span>
               <ArrowRight className="w-4 h-4" />
             </button>
 
-            <button
-              onClick={() => onGoToLogin('POLICE')}
+            <a
+              href="#how-it-works"
               className="w-full sm:w-auto px-6 py-3.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 font-bold text-xs sm:text-sm rounded-2xl border border-slate-300 dark:border-slate-700 shadow-sm hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
-              <Lock className="w-4 h-4 text-[#FF6A1A]" />
-              <span>Official Cadre Sign In</span>
-            </button>
+              <BookOpen className="w-4 h-4 text-[#4FA8E0]" />
+              <span>How It Works</span>
+            </a>
           </div>
 
           <p className="text-[11px] text-slate-500 dark:text-slate-400 pt-1">
-            Citizens can track complaint status using registered mobile or FIR acknowledgement number with zero technical friction.
+            Access is role-authenticated. Citizens verify by mobile/acknowledgement number; officials sign in via departmental credentials.
           </p>
 
         </div>
       </section>
 
-      {/* 3. Interactive Hover Stats */}
+      {/* 3. Interactive Key Capabilities */}
       <section className="px-4 sm:px-8 py-6 max-w-7xl mx-auto w-full">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {statItems.map((stat) => {
@@ -247,7 +254,6 @@ export default function LandingPage({
                   </div>
                 </div>
 
-                {/* Micro hover insight tooltip */}
                 <div className={`mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 text-[11px] leading-relaxed transition-all ${
                   isHovered 
                     ? 'text-orange-600 dark:text-orange-400 font-medium' 
@@ -261,17 +267,17 @@ export default function LandingPage({
         </div>
       </section>
 
-      {/* 4. Official Government Inter-Agency Pillars */}
+      {/* 4. Four Institutional Pillars */}
       <section className="px-4 sm:px-8 py-10 max-w-7xl mx-auto w-full space-y-6">
         <div className="text-center space-y-2">
           <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-orange-100 dark:bg-orange-950 text-[#FF6A1A] border border-orange-200 dark:border-orange-800">
             Four Pillars of Justice
           </span>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-            Inter-Agency Judicial & Law Enforcement Matrix
+            Inter-Agency Judicial & Law Enforcement Collaboration
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
-            Unified zero-trust architecture enabling cryptographic evidence handoffs across Indian statutory agencies.
+            Zero-trust digital chain of custody enabling verified handoffs across Indian statutory agencies.
           </p>
         </div>
 
@@ -303,19 +309,19 @@ export default function LandingPage({
         </div>
       </section>
 
-      {/* 5. Core Platform Features */}
-      <section className="px-4 sm:px-8 py-12 bg-white dark:bg-slate-900/60 border-y border-slate-200 dark:border-slate-800 transition-colors">
+      {/* 5. How It Works Section (id="how-it-works") */}
+      <section id="how-it-works" className="px-4 sm:px-8 py-12 bg-white dark:bg-slate-900/60 border-y border-slate-200 dark:border-slate-800 transition-colors">
         <div className="max-w-7xl mx-auto space-y-8">
           
           <div className="text-center space-y-2">
             <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-orange-100 dark:bg-orange-950 text-[#FF6A1A] border border-orange-200 dark:border-orange-800">
-              Technical Architecture
+              Core Principles
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-              Enterprise Specifications Built for Indian Evidence Law
+              How SecureChain DMS Protects Legal Records
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
-              Engineered to fulfill evidentiary mandates under Bharatiya Sakshya Adhiniyam (BSA) and CCTNS Interoperability guidelines.
+              Built to fulfill evidentiary mandates under Bharatiya Sakshya Adhiniyam (BSA) and CCTNS Interoperability guidelines.
             </p>
           </div>
 
@@ -335,7 +341,7 @@ export default function LandingPage({
                 </span>
               </div>
               <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                Scanned documents are analyzed with character-level confidence heatmapping. Hashes are sealed strictly upon human confirmation, preventing OCR noise from polluting legal dockets.
+                Scanned documents undergo automated text extraction. Integrity digests are sealed strictly on the human-confirmed text, preventing scanning noise from corrupting legal dockets.
               </p>
             </div>
 
@@ -346,14 +352,14 @@ export default function LandingPage({
               </div>
               <div>
                 <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                  Cryptographic Versioning
+                  No-Overwrite Versioning
                 </h3>
                 <span className="text-[10px] font-bold text-sky-600 uppercase tracking-wider">
-                  Zero Silent Overwrites
+                  Permanent Lineage
                 </span>
               </div>
               <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                Original FIR dockets remain permanently pristine. Any supplementary charge-sheet or forensic addendum creates a cryptographically linked child version with full lineage.
+                Original FIR dockets remain permanently pristine. Any supplementary charge-sheet or forensic addendum creates a cryptographically linked child version with complete audit lineage.
               </p>
             </div>
 
@@ -364,14 +370,14 @@ export default function LandingPage({
               </div>
               <div>
                 <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                  M-of-N Quorum Reviews
+                  Independent Quorum Approvals
                 </h3>
                 <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">
-                  Decentralized Consensus
+                  Multi-Officer Consensus
                 </span>
               </div>
               <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                Proposed docket modifications require 2-of-3 independent approvals from peer officers. Automatic conflict-of-interest enforcement prevents investigators from approving their own filings.
+                Proposed docket modifications require independent approval from peer officers. Automatic conflict-of-interest enforcement strictly bars investigators from approving their own filings.
               </p>
             </div>
 
@@ -382,14 +388,14 @@ export default function LandingPage({
               </div>
               <div>
                 <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                  Section 65B Generator
+                  $65B / §65B Certificate Generator
                 </h3>
                 <span className="text-[10px] font-bold text-purple-600 uppercase tracking-wider">
-                  Judicial Admissibility
+                  Court Admissibility
                 </span>
               </div>
               <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                Generates instant legal certificates conforming to Section 65B of Indian Evidence Act / Section 63 BSA 2023 with verified device hashes, officer attestations, and court seals.
+                Generates court certificates citing Evidence Act §65B and Section 63 BSA 2023 with verified device digests, officer attestations, and court seals for direct courtroom trials.
               </p>
             </div>
 
@@ -398,14 +404,14 @@ export default function LandingPage({
         </div>
       </section>
 
-      {/* 6. Statutory Acts & Gazette Reference Grid */}
+      {/* 6. Statutory Acts & Central Criminal Laws */}
       <section className="px-4 sm:px-8 py-12 max-w-7xl mx-auto w-full space-y-6">
         <div className="text-center space-y-2">
           <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-orange-100 dark:bg-orange-950 text-[#FF6A1A] border border-orange-200 dark:border-orange-800">
             Legislative Compliance
           </span>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-            Statutory Framework & Central Criminal Laws
+            Statutory Enactments & Criminal Law Reforms
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
             Grounded in the new criminal law enactments passed by the Parliament of India.
@@ -415,7 +421,7 @@ export default function LandingPage({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
           {legalActs.map((act, i) => (
             <div 
-              key={i}
+              key={i} 
               className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 space-y-3 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all"
             >
               <div className="flex items-center justify-between">
@@ -439,61 +445,6 @@ export default function LandingPage({
               </p>
             </div>
           ))}
-        </div>
-      </section>
-
-      {/* 7. Citizen Empowerment & Transparency */}
-      <section className="px-4 sm:px-8 py-10 max-w-7xl mx-auto w-full space-y-6">
-        <div className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-slate-900 dark:to-slate-900 border border-orange-200 dark:border-slate-800 rounded-3xl p-8 sm:p-12 shadow-sm flex flex-col md:flex-row items-center justify-between gap-8">
-          
-          <div className="space-y-3 max-w-xl">
-            <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-orange-100 dark:bg-orange-950 text-[#FF6A1A] border border-orange-200 dark:border-orange-800">
-              Direct Citizen Access
-            </span>
-            <h3 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
-              Check Your Case & Complaint Status Anytime
-            </h3>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-              No legal jargon, complex hash codes, or official credentials required. Simply verify your 10-digit registered mobile number or enter your FIR acknowledgement number to see plain-language investigation updates.
-            </p>
-            <div className="pt-2 flex flex-wrap items-center gap-3">
-              <button
-                onClick={onGoToCitizen}
-                className="px-6 py-3 bg-[#FF6A1A] hover:bg-[#E85B0E] text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer"
-              >
-                <span>Access Citizen Tracking Portal</span>
-                <ChevronRight className="w-4 h-4" />
-              </button>
-
-              <a 
-                href="https://pgportal.gov.in" 
-                target="_blank" 
-                rel="noreferrer"
-                className="px-4 py-3 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl border border-slate-300 dark:border-slate-700 shadow-xs transition-all flex items-center gap-1.5"
-              >
-                <span>CPGRAMS Grievance</span>
-                <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
-              </a>
-            </div>
-          </div>
-
-          <div className="w-full md:w-80 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-md space-y-3">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
-              <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Sample Docket Status</span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300">
-                Under Investigation
-              </span>
-            </div>
-            <div className="space-y-1">
-              <div className="text-xs font-mono font-bold text-slate-700 dark:text-slate-300">FIR No: 0842/2024</div>
-              <div className="text-[11px] text-slate-500 dark:text-slate-400">Special Investigation PS, New Delhi</div>
-            </div>
-            <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[11px] text-slate-600 dark:text-slate-400 flex items-center gap-2">
-              <Shield className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-              <span>Evidence locked under WORM cryptographic seal</span>
-            </div>
-          </div>
-
         </div>
       </section>
 

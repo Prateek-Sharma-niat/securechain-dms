@@ -60,7 +60,7 @@ const DEMO_PERSONAS = [
   {
     id: "JUD-ND-1044",
     portalRole: "JUDICIAL",
-    name: "Judicial Officer (Hon. Justice Iyer / Presiding Magistrate)",
+    name: "Judicial Officer (Presiding Magistrate)",
     role: "Presiding Magistrate / Judicial Authority",
     department: "Patiala House Courts, New Delhi (Special Investigation Court)",
     badge: "JUD-1044",
@@ -69,14 +69,14 @@ const DEMO_PERSONAS = [
     avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=120&auto=format&fit=crop&q=80",
     canRequestEdit: false,
     canApprove: true,
-    canDeAnonymize: true,
+    canDeAnonymize: false,
     court: "Patiala House Courts, New Delhi",
     otp: "123456"
   },
   {
     id: "JUD-DEL-089",
     portalRole: "JUDICIAL",
-    name: "Judicial Officer (Magistrate / Audit Authority)",
+    name: "Judicial Officer (Metropolitan Magistrate)",
     role: "Metropolitan Magistrate",
     department: "Patiala House Courts, New Delhi (Special Investigation Court)",
     badge: "JUD-089",
@@ -85,7 +85,7 @@ const DEMO_PERSONAS = [
     avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=120&auto=format&fit=crop&q=80",
     canRequestEdit: false,
     canApprove: true,
-    canDeAnonymize: true, // Audit authority can de-anonymize with mandatory typed justification
+    canDeAnonymize: false,
     court: "Patiala House Courts, New Delhi",
     otp: "123456"
   },
@@ -110,7 +110,7 @@ const DEMO_PERSONAS = [
   {
     id: "FSL-EXP-209",
     portalRole: "FORENSIC",
-    name: "Forensic Officer (Dr. Sunita Rao / Scientific Examiner)",
+    name: "Forensic Officer (Chief Scientific Officer)",
     role: "Chief Scientific Examiner & Digital Forensics Head",
     department: "Central Forensic Science Laboratory (CFSL), New Delhi",
     badge: "FSL-209",
@@ -196,9 +196,13 @@ const SEED_CASES = [
     placeOfOccurrence: "State Bank Corporate Branch, 4.2 KM West from PS",
     typeOfInformation: "Written Complaint",
     complainant: "Chief Vigilance Officer, State Bank of India Corporate Centre",
-    accused: "Primary Account Holder Rohit Varma & 5 Unknown Syndicate Associates",
+    accused: "Primary Account Holder (Accused) & 5 Unknown Syndicate Associates",
     investigatingOfficer: "Police Official (Investigating Officer)",
     requesterId: "POL-DL-4892",
+    requesterBadge: "IO-4892",
+    requesterStation: "Special Investigation Division PS, Mandir Marg, New Delhi",
+    sensitivityTier: "MEDIUM",
+    jurisdictionalPool: "District Police Review Pool",
     currentVersion: "1.0",
     status: "LOCKED",
     statusPlain: "Under Investigation",
@@ -222,7 +226,7 @@ Forensic mirror images and server logs extracted and sealed under Section 65B of
         status: "LOCKED",
         title: "Initial Formal FIR Registration",
         authorId: "POL-DL-4892",
-        authorPseudonym: "Officer_DL94",
+        authorPseudonym: "Approver_1",
         summaryDiff: "Genesis formal registration of FIR under Section 154 CrPC."
       }
     ]
@@ -245,6 +249,10 @@ Forensic mirror images and server logs extracted and sealed under Section 65B of
     accused: "Extortion Syndicate Operating under 'BlackByte-Telemetry'",
     investigatingOfficer: "Police Official (Investigating Officer)",
     requesterId: "POL-DL-4892",
+    requesterBadge: "IO-4892",
+    requesterStation: "Special Investigation Division PS, Mandir Marg, New Delhi",
+    sensitivityTier: "HIGH",
+    jurisdictionalPool: "State Police Review Pool",
     currentVersion: "1.0",
     draftVersion: "1.1",
     status: "PENDING_QUORUM",
@@ -300,6 +308,10 @@ Emergency technical response team isolated lateral channels. Packet captures and
     accused: "Anonymous Syndicate utilizing synthetic voice generation APIs",
     investigatingOfficer: "Police Official (Investigating Officer)",
     requesterId: "POL-DL-4892",
+    requesterBadge: "IO-4892",
+    requesterStation: "Special Investigation Division PS, Mandir Marg, New Delhi",
+    sensitivityTier: "MEDIUM",
+    jurisdictionalPool: "District Police Review Pool",
     currentVersion: "1.0",
     status: "LOCKED",
     statusPlain: "Under Investigation",
@@ -321,7 +333,7 @@ Trunk line signaling logs seized and sealed under Evidence Act Section 65B.`,
         status: "LOCKED",
         title: "Initial FIR Registration & Acoustic Evidence Ingestion",
         authorId: "POL-DL-4892",
-        authorPseudonym: "Officer_DL94",
+        authorPseudonym: "Approver_1",
         summaryDiff: "Formal FIR registered under Extortion and Intimidation provisions."
       }
     ]

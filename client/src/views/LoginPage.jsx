@@ -12,67 +12,76 @@ import {
   Sparkles,
   Lock,
   Building2,
-  Clock
+  Clock,
+  Phone,
+  FileSpreadsheet
 } from 'lucide-react';
 import PasswordField from '../components/PasswordField';
 import { useToast } from '../context/ToastContext';
 
+/**
+ * Unified Login Page (/login) per Master Spec Section 4:
+ * - One page, one URL
+ * - Top row of role tabs: Citizen | Police | Judicial | Forensic | Auditor
+ * - Selecting a tab reveals role-specific fields inside the same card:
+ *    - Citizen: Two sub-options ("By Mobile Number" vs "By Acknowledgement/Complaint Number") + OTP
+ *    - Police: Badge/Employee ID, Police Station dropdown, Password/OTP
+ *    - Judicial: Judicial ID / Bar Council No., Court/Jurisdiction dropdown, Password/OTP
+ *    - Forensic: Lab ID / Employee ID, Lab/Unit dropdown, Password/OTP
+ *    - Auditor: Auditor ID, Password/OTP (The ONLY way to reach audit log functionality)
+ * - PasswordField visibility toggle (eye icon) on all secret fields
+ * - Demo personas use strictly generic role titles
+ * - Fully styled for both Light and Dark themes
+ */
 export default function LoginPage({
   onLoginSuccess,
-  onBackToHome,
-  personas = [],
-  initialCadre = 'POLICE'
+  onCancel,
+  initialRole = 'CITIZEN'
 }) {
   const toast = useToast();
-  const [activeCadre, setActiveCadre] = useState(initialCadre); // 'POLICE' | 'JUDICIAL' | 'FORENSIC' | 'AUDITOR' | 'CITIZEN'
+  const [activeTab, setActiveTab] = useState(initialRole.toUpperCase()); // 'CITIZEN' | 'POLICE' | 'JUDICIAL' | 'FORENSIC' | 'AUDITOR'
   
-  // Officer credentials
-  const [employeeId, setEmployeeId] = useState('POL-DL-4892');
-  const [password, setPassword] = useState('123456');
-  
-  // Citizen credentials
-  const [citizenIdentifier, setCitizenIdentifier] = useState('9876543210');
+  // Citizen state
+  const [citizenMode, setCitizenMode] = useState('MOBILE'); // 'MOBILE' | 'ACK'
+  const [mobileNumber, setMobileNumber] = useState('9876543210');
+  const [ackNumber, setAckNumber] = useState('ACK-2024-88412');
+  const [citizenSecondFactor, setCitizenSecondFactor] = useState('citizen.delhi@gov.in');
   const [citizenOtp, setCitizenOtp] = useState('123456');
+
+  // Police state
+  const [policeId, setPoliceId] = useState('POL-DL-4892');
+  const [policeStation, setPoliceStation] = useState('Special Investigation Division PS, Mandir Marg');
+  const [policePassword, setPolicePassword] = useState('123456');
+
+  // Judicial state
+  const [judicialId, setJudicialId] = useState('JUD-ND-1044');
+  const [judicialCourt, setJudicialCourt] = useState('Patiala House Courts, New Delhi');
+  const [judicialPassword, setJudicialPassword] = useState('123456');
+
+  // Forensic state
+  const [forensicId, setForensicId] = useState('FSL-EXP-209');
+  const [forensicLab, setForensicLab] = useState('CFSL New Delhi');
+  const [forensicPassword, setForensicPassword] = useState('123456');
+
+  // Auditor state
+  const [auditorId, setAuditorId] = useState('AUD-MHA-007');
+  const [auditorPassword, setAuditorPassword] = useState('123456');
 
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  // Handle Cadre Tab Switch
-  const handleCadreChange = (cadre) => {
-    setActiveCadre(cadre);
+  const handleTabSwitch = (role) => {
+    setActiveTab(role);
     setErrorMsg('');
-    if (cadre === 'POLICE') {
-      setEmployeeId('POL-DL-4892');
-      setPassword('123456');
-    } else if (cadre === 'JUDICIAL') {
-      setEmployeeId('JUD-ND-1044');
-      setPassword('123456');
-    } else if (cadre === 'FORENSIC') {
-      setEmployeeId('FSL-EXP-209');
-      setPassword('123456');
-    } else if (cadre === 'AUDITOR') {
-      setEmployeeId('AUD-MHA-007');
-      setPassword('123456');
-    } else if (cadre === 'CITIZEN') {
-      setCitizenIdentifier('9876543210');
-      setCitizenOtp('123456');
-    }
   };
 
-  // Submit Officer Login
-  const handleOfficerLogin = async (e) => {
+  // Submit Official Cadre Login
+  const handleOfficerLogin = async (e, rolePortal, employeeId, password, extraData = {}) => {
     e.preventDefault();
     setLoading(true);
     setErrorMsg('');
 
     try {
-      const clean = employeeId.trim().toUpperCase();
-      let rolePortal = activeCadre;
-      if (clean.startsWith('JUD')) rolePortal = 'JUDICIAL';
-      else if (clean.startsWith('POL')) rolePortal = 'POLICE';
-      else if (clean.startsWith('FSL')) rolePortal = 'FORENSIC';
-      else if (clean.startsWith('AUD')) rolePortal = 'AUDITOR';
-
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -83,17 +92,10 @@ export default function LoginPage({
         })
       });
 
-      const contentType = res.headers.get('content-type');
-      let data;
-      if (contentType && contentType.includes('application/json')) {
-        data = await res.json();
-      } else {
-        const text = await res.text();
-        throw new Error(text || `Server responded with status ${res.status}`);
-      }
-      if (!res.ok) throw new Error(data.error || 'Authentication rejected by security gate.');
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Authentication rejected by credential gateway.');
 
-      toast.success(`Welcome back, ${data.user.name} (${data.user.rank || data.user.role})`);
+      toast.success(`Authenticated successfully as ${data.user.name} (${data.user.role || data.user.rank})`);
       onLoginSuccess(data.user);
     } catch (err) {
       setErrorMsg(err.message);
@@ -110,28 +112,21 @@ export default function LoginPage({
     setErrorMsg('');
 
     try {
-      const isMobile = /^\d{10}$/.test(citizenIdentifier.trim());
       const res = await fetch('/api/citizen/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          mobileNumber: isMobile ? citizenIdentifier.trim() : undefined,
-          ackNumber: !isMobile ? citizenIdentifier.trim() : undefined,
+          mobileNumber: citizenMode === 'MOBILE' ? mobileNumber.trim() : undefined,
+          ackNumber: citizenMode === 'ACK' ? ackNumber.trim() : undefined,
+          secondFactor: citizenMode === 'ACK' ? citizenSecondFactor.trim() : undefined,
           otp: citizenOtp.trim() || '123456'
         })
       });
 
-      const contentType = res.headers.get('content-type');
-      let data;
-      if (contentType && contentType.includes('application/json')) {
-        data = await res.json();
-      } else {
-        const text = await res.text();
-        throw new Error(text || `Server responded with status ${res.status}`);
-      }
-      if (!res.ok) throw new Error(data.error || 'Citizen verification failed');
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Citizen credential validation failed.');
 
-      toast.success(`Authenticated as Citizen ${data.citizen.name}`);
+      toast.success(`Authenticated as Citizen Complainant (${data.citizen.name})`);
       onLoginSuccess({
         id: data.citizen.id,
         name: data.citizen.name,
@@ -148,15 +143,13 @@ export default function LoginPage({
     }
   };
 
-  const cadreTabs = [
-    { id: 'POLICE', label: 'Police Cadre', icon: ShieldCheck, color: 'text-orange-600', badge: 'CrPC §154' },
-    { id: 'JUDICIAL', label: 'Judicial Authority', icon: Scale, color: 'text-sky-600', badge: 'BSA §63' },
-    { id: 'FORENSIC', label: 'Forensic Lab', icon: FlaskConical, color: 'text-emerald-600', badge: 'CFSL / RFSL' },
-    { id: 'AUDITOR', label: 'Statutory Auditor', icon: FileCheck2, color: 'text-purple-600', badge: 'WORM Vault' },
-    { id: 'CITIZEN', label: 'Citizen Portal', icon: User, color: 'text-slate-600', badge: 'Direct Tracking' }
+  const roleTabs = [
+    { id: 'CITIZEN', label: 'Citizen', icon: User, color: 'text-amber-600', badge: 'Public Tracking' },
+    { id: 'POLICE', label: 'Police / IO', icon: ShieldCheck, color: 'text-[#FF6A1A]', badge: 'CrPC §154' },
+    { id: 'JUDICIAL', label: 'Judicial', icon: Scale, color: 'text-sky-600', badge: 'BSA §63 / $65B' },
+    { id: 'FORENSIC', label: 'Forensic', icon: FlaskConical, color: 'text-emerald-600', badge: 'ISO/IEC 17025' },
+    { id: 'AUDITOR', label: 'Auditor', icon: FileCheck2, color: 'text-purple-600', badge: 'WORM Vault' }
   ];
-
-  const currentCadreConfig = cadreTabs.find(c => c.id === activeCadre);
 
   return (
     <div className="flex-1 bg-[#FFF9F2] dark:bg-slate-950 min-h-[calc(100vh-140px)] p-4 sm:p-8 flex flex-col justify-center items-center transition-colors">
@@ -164,98 +157,215 @@ export default function LoginPage({
         
         {/* Navigation Return */}
         <button
-          onClick={onBackToHome}
+          onClick={onCancel}
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-[#FF6A1A] transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          <span>Return to Public Portal Home</span>
+          <span>Return to Portal Home</span>
         </button>
 
-        {/* Main Login Card */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl p-6 sm:p-10 space-y-6">
+        {/* Main Unified Login Card */}
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-xl p-6 sm:p-10 space-y-6">
           
           {/* Header */}
           <div className="text-center space-y-2">
-            <div className="w-14 h-14 rounded-2xl bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800/60 text-[#FF6A1A] mx-auto flex items-center justify-center shadow-sm">
-              <ShieldCheck className="w-8 h-8" />
+            <div className="w-14 h-14 rounded-2xl bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800/60 text-[#FF6A1A] mx-auto flex items-center justify-center shadow-xs">
+              <Lock className="w-7 h-7" />
             </div>
-            <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
-              Official Cadre & Citizen Secure Login
+            <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 tracking-tight font-serif">
+              SecureChain DMS Access Gateway
             </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Federated zero-knowledge gateway protected by 256-bit encrypted HSM credentials
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-sans">
+              Single unified login with role-scoped credential routing
             </p>
           </div>
 
-          {/* Cadre Selection Pills */}
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl">
-            {cadreTabs.map((cadre) => {
-              const Icon = cadre.icon;
-              const isActive = activeCadre === cadre.id;
+          {/* Role Tabs Row */}
+          <div className="grid grid-cols-5 gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl">
+            {roleTabs.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
               return (
                 <button
-                  key={cadre.id}
+                  key={tab.id}
                   type="button"
-                  onClick={() => handleCadreChange(cadre.id)}
-                  className={`p-2 rounded-xl text-center text-xs font-bold transition-all cursor-pointer flex flex-col items-center gap-1 ${
+                  onClick={() => handleTabSwitch(tab.id)}
+                  className={`py-2 px-1 rounded-xl text-center text-xs font-bold transition-all cursor-pointer flex flex-col items-center gap-1 ${
                     isActive
                       ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-sm border border-slate-200/80 dark:border-slate-700'
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                   }`}
                 >
-                  <Icon className={`w-4 h-4 ${isActive ? cadre.color : 'text-slate-400'}`} />
-                  <span className="truncate text-[11px]">{cadre.label.split(' ')[0]}</span>
+                  <Icon className={`w-4 h-4 ${isActive ? tab.color : 'text-slate-400'}`} />
+                  <span className="truncate text-[10px] sm:text-[11px]">{tab.label}</span>
                 </button>
               );
             })}
           </div>
 
-          {/* Cadre Descriptor Badge */}
+          {/* Role Descriptor */}
           <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 text-xs">
             <div className="flex items-center gap-2 font-bold text-slate-800 dark:text-slate-200">
               <span className={`w-2.5 h-2.5 rounded-full ${
-                activeCadre === 'POLICE' ? 'bg-[#FF6A1A]' :
-                activeCadre === 'JUDICIAL' ? 'bg-[#4FA8E0]' :
-                activeCadre === 'FORENSIC' ? 'bg-[#5FA777]' :
-                activeCadre === 'AUDITOR' ? 'bg-purple-600' : 'bg-slate-500'
+                activeTab === 'POLICE' ? 'bg-[#FF6A1A]' :
+                activeTab === 'JUDICIAL' ? 'bg-[#4FA8E0]' :
+                activeTab === 'FORENSIC' ? 'bg-[#5FA777]' :
+                activeTab === 'AUDITOR' ? 'bg-purple-600' : 'bg-amber-500'
               }`} />
-              <span>{currentCadreConfig.label} Access Gateway</span>
+              <span>{roleTabs.find(t => t.id === activeTab)?.label} Gateway</span>
             </div>
             <span className="px-2 py-0.5 rounded-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-mono text-[10px] font-semibold text-slate-600 dark:text-slate-400">
-              {currentCadreConfig.badge}
+              {roleTabs.find(t => t.id === activeTab)?.badge}
             </span>
           </div>
 
-          {/* Forms */}
-          {activeCadre !== 'CITIZEN' ? (
-            /* OFFICIAL CADRE FORM (Police, Judicial, Forensic, Auditor) */
-            <form onSubmit={handleOfficerLogin} className="space-y-4">
-              <div className="space-y-1">
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                  {activeCadre === 'POLICE' ? 'Police Officer Badge ID / Employee ID' :
-                   activeCadre === 'JUDICIAL' ? 'Judicial Magistrate / Officer ID' :
-                   activeCadre === 'FORENSIC' ? 'Scientific Officer / FSL Lab ID' :
-                   'Auditor / CAG ID'}
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={employeeId}
-                    onChange={(e) => setEmployeeId(e.target.value)}
-                    placeholder="e.g. POL-DL-4892"
-                    required
-                    className="w-full px-3.5 py-2.5 text-xs font-mono font-bold bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#FF6A1A] focus:bg-white dark:focus:bg-slate-950 uppercase"
-                  />
-                </div>
+          {/* ================= 1. CITIZEN TAB ================= */}
+          {activeTab === 'CITIZEN' && (
+            <div className="space-y-4">
+              {/* Sub-option Selector */}
+              <div className="flex items-center gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl text-xs font-semibold">
+                <button
+                  type="button"
+                  onClick={() => setCitizenMode('MOBILE')}
+                  className={`flex-1 py-1.5 rounded-lg text-center transition-all cursor-pointer ${
+                    citizenMode === 'MOBILE'
+                      ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-2xs font-bold'
+                      : 'text-slate-600 dark:text-slate-400'
+                  }`}
+                >
+                  By Mobile Number
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCitizenMode('ACK')}
+                  className={`flex-1 py-1.5 rounded-lg text-center transition-all cursor-pointer ${
+                    citizenMode === 'ACK'
+                      ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-2xs font-bold'
+                      : 'text-slate-600 dark:text-slate-400'
+                  }`}
+                >
+                  By Acknowledgement / FIR No.
+                </button>
               </div>
 
-              {/* Password / OTP Field with Visibility Toggle */}
+              <form onSubmit={handleCitizenLogin} className="space-y-4">
+                {citizenMode === 'MOBILE' ? (
+                  <div className="space-y-1">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                      10-Digit Registered Mobile Number
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="tel"
+                        maxLength={10}
+                        value={mobileNumber}
+                        onChange={(e) => setMobileNumber(e.target.value)}
+                        placeholder="e.g. 9876543210"
+                        required
+                        className="w-full px-3.5 py-2.5 text-xs font-mono bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#FF6A1A]"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="space-y-1">
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                        Complaint / FIR Acknowledgement Number
+                      </label>
+                      <input
+                        type="text"
+                        value={ackNumber}
+                        onChange={(e) => setAckNumber(e.target.value)}
+                        placeholder="e.g. ACK-2024-88412 or FIR-2024-ND-0842"
+                        required
+                        className="w-full px-3.5 py-2.5 text-xs font-mono bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#FF6A1A]"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                        Second Factor (Registered Mobile or Email)
+                      </label>
+                      <input
+                        type="text"
+                        value={citizenSecondFactor}
+                        onChange={(e) => setCitizenSecondFactor(e.target.value)}
+                        placeholder="e.g. citizen.delhi@gov.in or 9876543210"
+                        required
+                        className="w-full px-3.5 py-2.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#FF6A1A]"
+                      />
+                    </div>
+                  </>
+                )}
+
+                <PasswordField
+                  id="citizen-otp"
+                  name="otp"
+                  label="6-Digit Verification OTP (Demo: 123456)"
+                  value={citizenOtp}
+                  onChange={(e) => setCitizenOtp(e.target.value)}
+                  placeholder="Enter 6-digit OTP"
+                  maxLength={6}
+                  required
+                />
+
+                {errorMsg && (
+                  <div className="p-3 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs rounded-xl flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                    <span>{errorMsg}</span>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-2.5 bg-[#FF6A1A] hover:bg-[#e05910] text-white font-bold text-xs rounded-xl shadow-md hover:shadow-lg transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  <BadgeCheck className="w-4 h-4" />
+                  <span>{loading ? 'Verifying OTP...' : 'Track My Case Records'}</span>
+                </button>
+              </form>
+            </div>
+          )}
+
+          {/* ================= 2. POLICE TAB ================= */}
+          {activeTab === 'POLICE' && (
+            <form onSubmit={(e) => handleOfficerLogin(e, 'POLICE', policeId, policePassword)} className="space-y-4">
+              <div className="space-y-1">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                  Badge ID / Police Official Employee ID
+                </label>
+                <input
+                  type="text"
+                  value={policeId}
+                  onChange={(e) => setPoliceId(e.target.value)}
+                  placeholder="e.g. POL-DL-4892"
+                  required
+                  className="w-full px-3.5 py-2.5 text-xs font-mono font-bold bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#FF6A1A] uppercase"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                  Police Station (Jurisdiction)
+                </label>
+                <select
+                  value={policeStation}
+                  onChange={(e) => setPoliceStation(e.target.value)}
+                  className="w-full px-3.5 py-2.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#FF6A1A]"
+                >
+                  <option value="Special Investigation Division PS, Mandir Marg">Special Investigation Division PS, Mandir Marg (Delhi)</option>
+                  <option value="State Criminal Investigation Department, Mumbai">State Criminal Investigation Department, Mumbai</option>
+                  <option value="Central Police Station, CID Headquarters, Bengaluru">Central Police Station, CID Headquarters, Bengaluru</option>
+                  <option value="Central Bureau of Investigation (CBI) Investigation Cell">Central Bureau of Investigation (CBI) Cell</option>
+                </select>
+              </div>
+
               <PasswordField
-                id="officer-password"
+                id="police-password"
                 name="password"
-                label="Security Password / HSM Passcode (Demo: 123456)"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                label="Security Password / Passcode (Demo: 123456)"
+                value={policePassword}
+                onChange={(e) => setPolicePassword(e.target.value)}
                 placeholder="Enter password or OTP"
                 required
               />
@@ -270,37 +380,54 @@ export default function LoginPage({
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2.5 bg-gradient-to-r from-[#FF6A1A] to-[#FF8C42] hover:from-[#e05910] text-white font-bold text-xs rounded-xl shadow-md hover:shadow-lg transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+                className="w-full py-2.5 bg-[#FF6A1A] hover:bg-[#e05910] text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 <ShieldCheck className="w-4 h-4" />
-                <span>{loading ? 'Verifying HSM Signature...' : `Authenticate as ${currentCadreConfig.label}`}</span>
+                <span>{loading ? 'Authenticating...' : 'Sign In as Police Official'}</span>
               </button>
             </form>
-          ) : (
-            /* CITIZEN FORM (Mobile / Ack + OTP) */
-            <form onSubmit={handleCitizenLogin} className="space-y-4">
+          )}
+
+          {/* ================= 3. JUDICIAL TAB ================= */}
+          {activeTab === 'JUDICIAL' && (
+            <form onSubmit={(e) => handleOfficerLogin(e, 'JUDICIAL', judicialId, judicialPassword)} className="space-y-4">
               <div className="space-y-1">
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                  Registered Mobile Number or FIR Acknowledgement No.
+                  Judicial ID / Bar Council Roll No.
                 </label>
                 <input
                   type="text"
-                  value={citizenIdentifier}
-                  onChange={(e) => setCitizenIdentifier(e.target.value)}
-                  placeholder="e.g. 9876543210 or FIR-2024-ND-0842"
+                  value={judicialId}
+                  onChange={(e) => setJudicialId(e.target.value)}
+                  placeholder="e.g. JUD-ND-1044"
                   required
-                  className="w-full px-3.5 py-2.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#FF6A1A] focus:bg-white dark:focus:bg-slate-950 font-medium"
+                  className="w-full px-3.5 py-2.5 text-xs font-mono font-bold bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#4FA8E0] uppercase"
                 />
               </div>
 
+              <div className="space-y-1">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                  Court / Jurisdiction
+                </label>
+                <select
+                  value={judicialCourt}
+                  onChange={(e) => setJudicialCourt(e.target.value)}
+                  className="w-full px-3.5 py-2.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#4FA8E0]"
+                >
+                  <option value="Patiala House Courts, New Delhi">Patiala House District Courts, New Delhi</option>
+                  <option value="High Court of Delhi">High Court of Delhi (Special Evidence Bench)</option>
+                  <option value="City Civil and Sessions Court, Mumbai">City Civil & Sessions Court, Mumbai</option>
+                  <option value="Chief Metropolitan Magistrate Court, Bengaluru">Chief Metropolitan Magistrate Court, Bengaluru</option>
+                </select>
+              </div>
+
               <PasswordField
-                id="citizen-otp"
-                name="otp"
-                label="6-Digit Verification OTP (Demo: 123456)"
-                value={citizenOtp}
-                onChange={(e) => setCitizenOtp(e.target.value)}
-                placeholder="Enter 6-digit OTP"
-                maxLength={6}
+                id="judicial-password"
+                name="password"
+                label="Security Password / Judicial Token (Demo: 123456)"
+                value={judicialPassword}
+                onChange={(e) => setJudicialPassword(e.target.value)}
+                placeholder="Enter password or OTP"
                 required
               />
 
@@ -314,71 +441,191 @@ export default function LoginPage({
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2.5 bg-gradient-to-r from-[#FF6A1A] to-[#FF8C42] hover:from-[#e05910] text-white font-bold text-xs rounded-xl shadow-md hover:shadow-lg transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+                className="w-full py-2.5 bg-[#4FA8E0] hover:bg-[#3B97D1] text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                <BadgeCheck className="w-4 h-4" />
-                <span>{loading ? 'Validating Token...' : 'Track My Complaints & Crime Records'}</span>
+                <Scale className="w-4 h-4" />
+                <span>{loading ? 'Validating Token...' : 'Sign In as Judicial Officer'}</span>
               </button>
             </form>
           )}
 
-          {/* Quick Demo Credentials Assistant */}
-          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-2.5">
+          {/* ================= 4. FORENSIC TAB ================= */}
+          {activeTab === 'FORENSIC' && (
+            <form onSubmit={(e) => handleOfficerLogin(e, 'FORENSIC', forensicId, forensicPassword)} className="space-y-4">
+              <div className="space-y-1">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                  Forensic Officer Lab ID / Employee ID
+                </label>
+                <input
+                  type="text"
+                  value={forensicId}
+                  onChange={(e) => setForensicId(e.target.value)}
+                  placeholder="e.g. FSL-EXP-209"
+                  required
+                  className="w-full px-3.5 py-2.5 text-xs font-mono font-bold bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#5FA777] uppercase"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                  Forensic Laboratory / Unit
+                </label>
+                <select
+                  value={forensicLab}
+                  onChange={(e) => setForensicLab(e.target.value)}
+                  className="w-full px-3.5 py-2.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#5FA777]"
+                >
+                  <option value="CFSL New Delhi">Central Forensic Science Laboratory (CFSL), New Delhi</option>
+                  <option value="CFSL Hyderabad">Central Forensic Science Laboratory (CFSL), Hyderabad</option>
+                  <option value="CFSL Chandigarh">Central Forensic Science Laboratory (CFSL), Chandigarh</option>
+                  <option value="State FSL Mumbai">State Forensic Science Laboratory, Mumbai</option>
+                </select>
+              </div>
+
+              <PasswordField
+                id="forensic-password"
+                name="password"
+                label="Lab Passcode / HSM Key (Demo: 123456)"
+                value={forensicPassword}
+                onChange={(e) => setForensicPassword(e.target.value)}
+                placeholder="Enter passcode"
+                required
+              />
+
+              {errorMsg && (
+                <div className="p-3 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs rounded-xl flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <span>{errorMsg}</span>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-2.5 bg-[#5FA777] hover:bg-[#4E9264] text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                <FlaskConical className="w-4 h-4" />
+                <span>{loading ? 'Authenticating Lab...' : 'Sign In as Forensic Officer'}</span>
+              </button>
+            </form>
+          )}
+
+          {/* ================= 5. AUDITOR TAB ================= */}
+          {activeTab === 'AUDITOR' && (
+            <form onSubmit={(e) => handleOfficerLogin(e, 'AUDITOR', auditorId, auditorPassword)} className="space-y-4">
+              <div className="space-y-1">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                  Auditor ID / Statutory Audit Authority ID
+                </label>
+                <input
+                  type="text"
+                  value={auditorId}
+                  onChange={(e) => setAuditorId(e.target.value)}
+                  placeholder="e.g. AUD-MHA-007"
+                  required
+                  className="w-full px-3.5 py-2.5 text-xs font-mono font-bold bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-purple-600 uppercase"
+                />
+              </div>
+
+              <div className="p-3 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-900 rounded-xl text-[11px] text-purple-700 dark:text-purple-300">
+                Exclusive statutory gateway: Provides access to the WORM write-once audit trail, tamper verification, and de-anonymization authority.
+              </div>
+
+              <PasswordField
+                id="auditor-password"
+                name="password"
+                label="Master Audit Key / HSM Passcode (Demo: 123456)"
+                value={auditorPassword}
+                onChange={(e) => setAuditorPassword(e.target.value)}
+                placeholder="Enter auditor passcode"
+                required
+              />
+
+              {errorMsg && (
+                <div className="p-3 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs rounded-xl flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <span>{errorMsg}</span>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                <FileCheck2 className="w-4 h-4" />
+                <span>{loading ? 'Accessing Ledger...' : 'Sign In as Statutory Auditor'}</span>
+              </button>
+            </form>
+          )}
+
+          {/* Quick Demo Fill Pills with Generic Role Titles */}
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-2">
             <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300">
               <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-              <span>Quick Demo Personas (1-Click Fill)</span>
+              <span>Quick Demo Role Fill (Generic Titles)</span>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5 text-left">
               <button
                 type="button"
                 onClick={() => {
-                  handleCadreChange('POLICE');
-                  setEmployeeId('POL-DL-4892');
-                  setPassword('123456');
+                  setActiveTab('CITIZEN');
+                  setCitizenMode('MOBILE');
+                  setMobileNumber('9876543210');
+                  setCitizenOtp('123456');
                 }}
-                className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-orange-400 text-left transition-colors cursor-pointer"
+                className="p-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-amber-400 transition-colors cursor-pointer"
               >
-                <div className="text-[11px] font-bold text-orange-600 truncate">Inspector Rajesh</div>
-                <div className="text-[9px] text-slate-500 font-mono">POL-DL-4892</div>
+                <div className="text-[10px] font-bold text-amber-600 truncate">Citizen</div>
+                <div className="text-[9px] text-slate-400 font-mono">9876543210</div>
               </button>
-              
               <button
                 type="button"
                 onClick={() => {
-                  handleCadreChange('JUDICIAL');
-                  setEmployeeId('JUD-ND-1044');
-                  setPassword('123456');
+                  setActiveTab('POLICE');
+                  setPoliceId('POL-DL-4892');
+                  setPolicePassword('123456');
                 }}
-                className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-sky-400 text-left transition-colors cursor-pointer"
+                className="p-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-orange-400 transition-colors cursor-pointer"
               >
-                <div className="text-[11px] font-bold text-sky-600 truncate">Hon. Justice Iyer</div>
-                <div className="text-[9px] text-slate-500 font-mono">JUD-ND-1044</div>
+                <div className="text-[10px] font-bold text-orange-600 truncate">Police Official</div>
+                <div className="text-[9px] text-slate-400 font-mono">POL-DL-4892</div>
               </button>
-
               <button
                 type="button"
                 onClick={() => {
-                  handleCadreChange('FORENSIC');
-                  setEmployeeId('FSL-EXP-209');
-                  setPassword('123456');
+                  setActiveTab('JUDICIAL');
+                  setJudicialId('JUD-ND-1044');
+                  setJudicialPassword('123456');
                 }}
-                className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-emerald-400 text-left transition-colors cursor-pointer"
+                className="p-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-sky-400 transition-colors cursor-pointer"
               >
-                <div className="text-[11px] font-bold text-emerald-600 truncate">Dr. Sunita Rao</div>
-                <div className="text-[9px] text-slate-500 font-mono">FSL-EXP-209</div>
+                <div className="text-[10px] font-bold text-sky-600 truncate">Judicial Officer</div>
+                <div className="text-[9px] text-slate-400 font-mono">JUD-ND-1044</div>
               </button>
-
               <button
                 type="button"
                 onClick={() => {
-                  handleCadreChange('AUDITOR');
-                  setEmployeeId('AUD-MHA-007');
-                  setPassword('123456');
+                  setActiveTab('FORENSIC');
+                  setForensicId('FSL-EXP-209');
+                  setForensicPassword('123456');
                 }}
-                className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-purple-400 text-left transition-colors cursor-pointer"
+                className="p-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-emerald-400 transition-colors cursor-pointer"
               >
-                <div className="text-[11px] font-bold text-purple-600 truncate">Auditor General</div>
-                <div className="text-[9px] text-slate-500 font-mono">AUD-MHA-007</div>
+                <div className="text-[10px] font-bold text-emerald-600 truncate">Forensic Officer</div>
+                <div className="text-[9px] text-slate-400 font-mono">FSL-EXP-209</div>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveTab('AUDITOR');
+                  setAuditorId('AUD-MHA-007');
+                  setAuditorPassword('123456');
+                }}
+                className="p-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-purple-400 transition-colors cursor-pointer"
+              >
+                <div className="text-[10px] font-bold text-purple-600 truncate">Statutory Auditor</div>
+                <div className="text-[9px] text-slate-400 font-mono">AUD-MHA-007</div>
               </button>
             </div>
           </div>

@@ -9,7 +9,7 @@ export const translations = {
     // Top Micro-strip
     govtOfIndia: "GOVERNMENT OF INDIA",
     ministryHeader: "Ministry of Home Affairs — National Investigation Records System",
-    helpline: "National Emergency & Investigation Helpline: 1930",
+    helpline: "National Emergency & Investigation Helpline: 112",
     contrastStandard: "Standard",
     contrastHigh: "High Contrast",
     fontSize: "Font Size",
@@ -176,7 +176,7 @@ export const translations = {
     // Top Micro-strip
     govtOfIndia: "भारत सरकार",
     ministryHeader: "गृह मंत्रालय — राष्ट्रीय जांच दस्तावेज़ प्रणाली",
-    helpline: "राष्ट्रीय आपातकालीन एवं जांच हेल्पलाइन: 1930",
+    helpline: "राष्ट्रीय आपातकालीन एवं जांच हेल्पलाइन: 112",
     contrastStandard: "सामान्य",
     contrastHigh: "उच्च कंट्रास्ट",
     fontSize: "फ़ॉन्ट आकार",
