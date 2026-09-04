@@ -90,7 +90,7 @@ export default function DashboardView({
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
 
-  // Define cadre sidebar tabs strictly scoped to each role
+  // Define cadre sidebar tabs strictly scoped to each role (Sections 6, 7, 8, 9, 10, 23)
   const getSidebarTabs = () => {
     switch (role) {
       case 'POLICE':
@@ -98,8 +98,7 @@ export default function DashboardView({
           { id: 'overview', label: 'Home', icon: Home, badge: null },
           { id: 'cases', label: 'My Cases', icon: FolderArchive, badge: documents.length },
           { id: 'upload', label: 'Upload New FIR', icon: UploadCloud, badge: null },
-          { id: 'edits', label: 'My Edit Requests', icon: FileCheck, badge: documents.filter(d => d.status === 'PENDING_QUORUM').length || null },
-          { id: 'custody', label: 'Chain of Custody', icon: Activity, badge: null },
+          { id: 'my_requests', label: 'My Requests (Quorum Status)', icon: FileCheck, badge: documents.filter(d => d.status === 'PENDING_QUORUM').length || null },
           { id: 'notifications', label: 'Notifications', icon: Bell, badge: '2' },
           { id: 'settings', label: 'Settings', icon: Settings, badge: null }
         ];
@@ -108,8 +107,9 @@ export default function DashboardView({
           { id: 'overview', label: 'Home', icon: Home, badge: null },
           { id: 'pending', label: 'Cases Pending Verification', icon: FolderArchive, badge: documents.length },
           { id: 'verify', label: 'Hash Verification Tool', icon: Hash, badge: null },
-          { id: 'cert65b', label: '$65B / §65B Certificate Generator', icon: Award, badge: null },
-          { id: 'approvals', label: 'Approval Queue', icon: FileCheck2, badge: documents.filter(d => d.status === 'PENDING_QUORUM').length || null },
+          { id: 'cert65b', label: '§65B Certificate Generator', icon: Award, badge: null },
+          { id: 'approvals', label: 'Quorum Approval', icon: FileCheck2, badge: documents.filter(d => d.status === 'PENDING_QUORUM').length || null },
+          { id: 'audit', label: 'WORM Audit Log', icon: ScrollText, badge: null },
           { id: 'settings', label: 'Settings', icon: Settings, badge: null }
         ];
       case 'FORENSIC':
@@ -119,7 +119,8 @@ export default function DashboardView({
           { id: 'upload', label: 'Upload New Report', icon: UploadCloud, badge: null },
           { id: 'ocr', label: 'OCR/Analysis Queue', icon: Layers, badge: 3 },
           { id: 'custody', label: 'Evidence Chain of Custody', icon: PackageCheck, badge: '2 Sealed' },
-          { id: 'reviews', label: 'My Pending Reviews', icon: FileCheck2, badge: documents.filter(d => d.status === 'PENDING_QUORUM').length || null },
+          { id: 'my_requests', label: 'My Requests (Quorum Status)', icon: FileCheck, badge: documents.filter(d => d.status === 'PENDING_QUORUM').length || null },
+          { id: 'approvals', label: 'Quorum Approval', icon: FileCheck2, badge: documents.filter(d => d.status === 'PENDING_QUORUM').length || null },
           { id: 'settings', label: 'Settings', icon: Settings, badge: null }
         ];
       case 'AUDITOR':

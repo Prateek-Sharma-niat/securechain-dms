@@ -48,52 +48,12 @@ export default function LandingPage({
   lang = 'en'
 }) {
   const t = translations[lang] || translations.en;
-  const [hoveredStat, setHoveredStat] = useState(null);
 
   const tickerAdvisories = [
     "Government Gazette: Bharatiya Sakshya Adhiniyam (BSA), 2023 Section 63 electronic certification is now mandatory for court exhibits.",
     "National Standard: Bharatiya Nagarik Suraksha Sanhita (BNSS), 2023 Section 173 e-FIR records are secured with permanent digital verification.",
     "Integrity Mandate: Amendments to case records require 2-of-3 independent multi-cadre consensus under statutory evidence rules.",
     "Citizen Alert: National Emergency Helpline 112 and Free Legal Aid 15100 are operational 24x7 across all states and union territories."
-  ];
-
-  const statItems = [
-    {
-      id: 'firs',
-      label: lang === 'hi' ? 'सील किए गए केस' : 'Secured Case Records',
-      val: metrics?.totalDocuments ? `${metrics.totalDocuments} Records` : '100% Locked',
-      sub: lang === 'hi' ? 'शून्य अनधिकृत फेरबदल' : 'Zero unapproved alterations',
-      icon: Shield,
-      color: 'text-orange-500 bg-orange-50 dark:bg-orange-950/40 border-orange-200 dark:border-orange-900',
-      hoverDetail: 'Every registered FIR is tamper-evident under Ministry of Home Affairs evidentiary standards.'
-    },
-    {
-      id: 'blocks',
-      label: lang === 'hi' ? 'सुरक्षित लेज़र प्रविष्टियां' : 'Chained Proof Entries',
-      val: metrics?.totalBlocks ? `${metrics.totalBlocks} Entries` : '14 Verified',
-      sub: lang === 'hi' ? 'परस्पर जुड़ा डिजिटल लेज़र' : 'Interlinked permanent custody ledger',
-      icon: Database,
-      color: 'text-sky-500 bg-sky-50 dark:bg-sky-950/40 border-sky-200 dark:border-sky-900',
-      hoverDetail: 'Each entry mathematically anchors to its predecessor for unalterable proof of sequence.'
-    },
-    {
-      id: 'quorum',
-      label: lang === 'hi' ? 'बहु-अधिकारी सत्यापन' : 'Multi-Officer Reviews',
-      val: '2-of-3 Quorum',
-      sub: lang === 'hi' ? 'स्वतंत्र समीक्षा मंडल' : 'Strict separation of powers',
-      icon: FileCheck2,
-      color: 'text-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900',
-      hoverDetail: 'No individual official can approve their own record amendment without independent peer review.'
-    },
-    {
-      id: 'compliance',
-      label: lang === 'hi' ? 'न्यायालयीन अनुपालन' : 'Court Admissibility',
-      val: 'BSA §63 / $65B',
-      sub: lang === 'hi' ? 'स्वतः कानूनी प्रमाणपत्र' : 'Automated evidentiary certificate',
-      icon: Scale,
-      color: 'text-purple-500 bg-purple-50 dark:bg-purple-950/40 border-purple-200 dark:border-purple-900',
-      hoverDetail: 'High-court approved evidentiary chain-of-custody format for swift judicial scrutiny.'
-    }
   ];
 
   const institutionalWings = [
@@ -174,9 +134,24 @@ export default function LandingPage({
         </div>
       </div>
 
-      {/* 2. Hero Section (Single unified Login entry point per Section 3) */}
-      <section className="px-4 sm:px-8 pt-12 sm:pt-16 pb-12 max-w-7xl mx-auto w-full">
-        <div className="text-center max-w-3xl mx-auto space-y-6">
+      {/* 2. Hero Section with India Motif Watermark (Section 22) */}
+      <section className="relative px-4 sm:px-8 pt-12 sm:pt-16 pb-14 max-w-7xl mx-auto w-full overflow-hidden">
+        {/* Subtle India & Justice Scales Watermark (Section 22) */}
+        <div className="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden">
+          <svg 
+            className="w-[580px] h-[580px] opacity-[0.09] dark:opacity-[0.06] text-orange-600 dark:text-orange-400 select-none"
+            viewBox="0 0 200 200" 
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            {/* Stylized India Geographical Silhouette & Scales Motif */}
+            <path d="M100 10 C105 18, 115 22, 118 28 C122 36, 130 40, 138 48 C145 55, 142 62, 140 70 C138 78, 144 85, 146 95 C148 105, 140 115, 135 125 C130 135, 122 145, 115 158 C110 168, 105 178, 100 190 C95 178, 90 168, 85 158 C78 145, 70 135, 65 125 C60 115, 52 105, 54 95 C56 85, 62 78, 60 70 C58 62, 55 55, 62 48 C70 40, 78 36, 82 28 C85 22, 95 18, 100 10 Z" />
+            <circle cx="100" cy="85" r="28" fill="none" stroke="currentColor" strokeWidth="2.5" strokeDasharray="3 2" />
+            <path d="M72 85 L128 85 M100 58 L100 112 M76 75 L62 98 L90 98 Z M124 75 L110 98 L138 98 Z" stroke="currentColor" strokeWidth="2" fill="none" />
+          </svg>
+        </div>
+
+        <div className="relative text-center max-w-3xl mx-auto space-y-6">
           
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-100 dark:bg-orange-950/60 border border-orange-300 dark:border-orange-800/80 text-[#FF6A1A] text-xs font-bold shadow-xs">
             <Shield className="w-3.5 h-3.5" />
@@ -216,54 +191,6 @@ export default function LandingPage({
             Access is role-authenticated. Citizens verify by mobile/acknowledgement number; officials sign in via departmental credentials.
           </p>
 
-        </div>
-      </section>
-
-      {/* 3. Interactive Key Capabilities */}
-      <section className="px-4 sm:px-8 py-6 max-w-7xl mx-auto w-full">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {statItems.map((stat) => {
-            const Icon = stat.icon;
-            const isHovered = hoveredStat === stat.id;
-            return (
-              <div
-                key={stat.id}
-                onMouseEnter={() => setHoveredStat(stat.id)}
-                onMouseLeave={() => setHoveredStat(null)}
-                className={`relative bg-white dark:bg-slate-900 border rounded-3xl p-5 transition-all duration-200 cursor-default select-none group ${
-                  isHovered
-                    ? 'border-orange-300 dark:border-orange-500/60 shadow-xl -translate-y-1.5'
-                    : 'border-slate-200 dark:border-slate-800 shadow-xs hover:border-slate-300 dark:hover:border-slate-700'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
-                    {stat.label}
-                  </span>
-                  <div className={`w-9 h-9 rounded-2xl border flex items-center justify-center transition-transform group-hover:scale-110 ${stat.color}`}>
-                    <Icon className="w-4 h-4" />
-                  </div>
-                </div>
-
-                <div className="mt-3">
-                  <div className="text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
-                    {stat.val}
-                  </div>
-                  <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                    {stat.sub}
-                  </div>
-                </div>
-
-                <div className={`mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 text-[11px] leading-relaxed transition-all ${
-                  isHovered 
-                    ? 'text-orange-600 dark:text-orange-400 font-medium' 
-                    : 'text-slate-400 dark:text-slate-500'
-                }`}>
-                  {stat.hoverDetail}
-                </div>
-              </div>
-            );
-          })}
         </div>
       </section>
 

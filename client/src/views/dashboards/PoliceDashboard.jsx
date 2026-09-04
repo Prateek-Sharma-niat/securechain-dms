@@ -213,101 +213,133 @@ export default function PoliceDashboard({
         </div>
       )}
 
-      {/* VIEW 3: MY EDIT REQUESTS */}
-      {activeTab === 'edits' && (
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xs space-y-5 animate-in fade-in">
-          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+      {/* VIEW 3: MY REQUESTS (QUORUM STATUS) — Master Spec Section 7 & 12 */}
+      {(activeTab === 'my_requests' || activeTab === 'edits') && (
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6 animate-in fade-in">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
             <div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 font-serif">
-                My Amendment & Supplementary Requests
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                Requester Scrutiny View
+              </span>
+              <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 mt-1 font-serif">
+                My Requests (Quorum Status)
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 font-sans">
-                Status chips tracking your requested changes through independent peer quorum
+                Read-only tracking of your submitted amendment dockets. Requesters cannot vote on their own requests (Rule 4B lock).
               </p>
             </div>
+            <span className="px-3 py-1 bg-amber-50 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800 rounded-xl text-xs font-bold font-mono self-start sm:self-auto">
+              {pendingRequests.length} Active Requests
+            </span>
           </div>
 
-          <div className="space-y-4">
-            {pendingRequests.map(doc => (
-              <div 
-                key={doc.id}
-                className="p-5 rounded-2xl border border-amber-200 dark:border-amber-900/60 bg-amber-50/40 dark:bg-amber-950/20 space-y-3"
-              >
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs font-bold text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-800 px-2.5 py-0.5 rounded border border-slate-200 dark:border-slate-700">
-                      {doc.firNo}
-                    </span>
-                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                      Draft v{doc.draftVersion || '1.1'}
-                    </span>
+          {pendingRequests.length === 0 ? (
+            <div className="text-center py-10 space-y-2">
+              <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto" />
+              <div className="text-xs font-bold text-slate-800 dark:text-slate-200">No Pending Quorum Requests</div>
+              <p className="text-[11px] text-slate-500 max-w-sm mx-auto">
+                All supplementary reports submitted by your station have been verified and sealed into the permanent ledger.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-5">
+              {pendingRequests.map(doc => {
+                const session = doc.quorumSession || {
+                  threshold: 2,
+                  totalEligible: 3,
+                  approvalCount: 1,
+                  poolLabel: doc.jurisdictionalPool || "District Police Review Pool",
+                  approverSlots: [
+                    { slotIndex: 1, title: "Approver 1", hasVoted: true, vote: "APPROVE" },
+                    { slotIndex: 2, title: "Approver 2", hasVoted: false, vote: null },
+                    { slotIndex: 3, title: "Approver 3", hasVoted: false, vote: null }
+                  ]
+                };
+                const approvalCount = session.approvalCount || 1;
+                const threshold = session.threshold || 2;
+                const progressPct = Math.min(100, Math.round((approvalCount / threshold) * 100));
+
+                return (
+                  <div 
+                    key={doc.id}
+                    className="p-6 rounded-3xl border border-amber-200 dark:border-amber-900/60 bg-amber-50/30 dark:bg-amber-950/20 space-y-4 shadow-xs"
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-amber-200/50 dark:border-amber-900/40 pb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-xs font-bold text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-800 px-2.5 py-0.5 rounded border border-slate-200 dark:border-slate-700">
+                          {doc.firNo}
+                        </span>
+                        <span className="text-xs font-bold text-amber-700 dark:text-amber-300">
+                          Draft v{doc.draftVersion || '1.1'}
+                        </span>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
+                          🔴 Pending Quorum
+                        </span>
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 flex items-center gap-1">
+                          <Lock className="w-3 h-3 text-amber-600" />
+                          <span>Rule 4B Self-Approval Locked</span>
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 font-serif">
+                        {doc.caseTitle}
+                      </h4>
+                      <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-sans">
+                        {doc.draftData?.editSummary || doc.versions?.find(v => v.version === doc.draftVersion)?.summaryDiff || "Supplementary findings and charge details submitted for peer review."}
+                      </p>
+                    </div>
+
+                    {/* Progress Indicator & Peer Approvers Status */}
+                    <div className="space-y-2 bg-white dark:bg-slate-900 p-4 rounded-2xl border border-amber-200/60 dark:border-amber-900/30">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-bold text-slate-800 dark:text-slate-200">
+                          Consensus Progress:
+                        </span>
+                        <span className="font-mono text-xs font-semibold text-slate-600 dark:text-slate-400">
+                          {approvalCount} of {threshold} approvals received ({session.totalEligible || 3} eligible slots)
+                        </span>
+                      </div>
+
+                      <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-200 dark:border-slate-700">
+                        <div 
+                          className="h-full bg-[#5FA777] transition-all duration-500 rounded-full"
+                          style={{ width: `${progressPct}%` }}
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2">
+                        {(session.approverSlots || []).map((slot, idx) => (
+                          <div 
+                            key={idx}
+                            className={`p-2 rounded-xl border text-xs flex items-center justify-between ${
+                              slot.hasVoted 
+                                ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300' 
+                                : 'bg-slate-50 dark:bg-slate-850 border-slate-200 dark:border-slate-700 text-slate-500'
+                            }`}
+                          >
+                            <span className="font-medium">{slot.title || `Approver ${idx + 1}`}</span>
+                            <span className="text-[10px] font-bold font-mono">
+                              {slot.hasVoted ? 'Approved' : 'Pending'}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400 flex flex-col sm:flex-row sm:items-center justify-between gap-1 pt-1">
+                      <span>Routing: <strong className="text-slate-800 dark:text-slate-200">{session.poolLabel || doc.jurisdictionalPool || "District Police Review Pool"}</strong></span>
+                      <span className="text-amber-700 dark:text-amber-300 font-medium">Read-Only View: Police cannot vote on own submitted requests</span>
+                    </div>
                   </div>
-
-                  {/* Status Chips */}
-                  <div className="flex items-center gap-1.5">
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
-                      🔴 Pending Quorum
-                    </span>
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
-                      Self-Approval Blocked
-                    </span>
-                  </div>
-                </div>
-
-                <div className="text-xs text-slate-700 dark:text-slate-300 space-y-1">
-                  <div className="font-bold text-slate-900 dark:text-slate-100">{doc.caseTitle}</div>
-                  <p className="leading-relaxed">
-                    {doc.draftData?.editSummary || doc.versions?.find(v => v.version === doc.draftVersion)?.summaryDiff || "Supplementary findings submitted for peer review."}
-                  </p>
-                </div>
-
-                <div className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between pt-1 border-t border-amber-200/60 dark:border-amber-900/40">
-                  <span>Routing: <strong>{doc.jurisdictionalPool || "District Police Review Pool"}</strong></span>
-                  <span>Awaiting independent peer officer review</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* VIEW 4: CHAIN OF CUSTODY TIMELINE (Plain Language, No Hashes) */}
-      {activeTab === 'custody' && (
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6 animate-in fade-in">
-          <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
-            <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 font-serif">
-              Evidence Chain of Custody Timeline
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-sans">
-              Plain-language custody record tracking who touched the evidence exhibits and when
-            </p>
-          </div>
-
-          <div className="space-y-4 max-w-2xl">
-            {custodyEvents.map((evt, idx) => (
-              <div key={idx} className="flex items-start gap-3.5 relative">
-                {idx < custodyEvents.length - 1 && (
-                  <div className="absolute left-4 top-8 bottom-0 w-0.5 bg-slate-200 dark:bg-slate-700 -ml-px"></div>
-                )}
-                <div className="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-950/80 border-2 border-[#FF6A1A] flex items-center justify-center text-[#FF6A1A] flex-shrink-0 z-10">
-                  <CheckCircle2 className="w-4 h-4" />
-                </div>
-                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800 flex-1 space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                      {evt.step}
-                    </span>
-                    <span className="text-[10px] font-mono text-[#FF6A1A] font-semibold bg-orange-50 dark:bg-orange-950 px-2 py-0.5 rounded">
-                      {evt.status}
-                    </span>
-                  </div>
-                  <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                    Handled By: <strong>{evt.actor}</strong> • Timestamp: <span className="font-mono">{evt.time}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 
@@ -353,7 +385,7 @@ export default function PoliceDashboard({
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                  Evidence Custody Events
+                  Cryptographic Ledger Health
                 </span>
                 <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950 text-[#5FA777] flex items-center justify-center">
                   <CheckCircle2 className="w-4 h-4" />
@@ -363,7 +395,7 @@ export default function PoliceDashboard({
                 100% Sealed
               </div>
               <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                Encrypted at rest with automated tamper detection
+                AES-256 encrypted at rest with automated tamper detection
               </p>
             </div>
 

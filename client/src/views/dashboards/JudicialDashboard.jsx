@@ -25,6 +25,8 @@ import {
 import AshokaEmblem from '../../components/AshokaEmblem';
 import { translations } from '../../i18n/translations';
 import { useToast } from '../../context/ToastContext';
+import AuditLogView from '../AuditLogView';
+import ApprovalsView from '../ApprovalsView';
 
 /**
  * Judicial Dashboard per Master Spec Section 8 & 20.3:
@@ -327,7 +329,7 @@ export default function JudicialDashboard({
       )}
 
       {/* VIEW 3: $65B / §65B CERTIFICATE GENERATOR */}
-      {activeTab === 'section65b' && (
+      {(activeTab === 'section65b' || activeTab === 'cert65b') && (
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6 animate-in fade-in">
           <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
             <div>
@@ -385,7 +387,35 @@ export default function JudicialDashboard({
         </div>
       )}
 
-      {/* VIEW 4: OVERVIEW / DEFAULT */}
+      {/* VIEW 4: QUORUM APPROVAL (ACTIONABLE MODE) */}
+      {activeTab === 'approvals' && (
+        <div className="space-y-4 animate-in fade-in">
+          <ApprovalsView
+            documents={documents}
+            activeUser={activeUser}
+            onVoteSuccess={() => toast.success("Consensus vote recorded on immutable ledger.")}
+            initialTab="approvals"
+            lang={lang}
+          />
+        </div>
+      )}
+
+      {/* VIEW 5: WORM AUDIT LOG (READ-ONLY FOR JUDICIAL PER SECTION 8 & 10) */}
+      {activeTab === 'audit' && (
+        <div className="space-y-4 animate-in fade-in">
+          <div className="bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800 p-4 rounded-2xl flex items-center justify-between text-xs text-sky-800 dark:text-sky-300">
+            <span className="font-semibold">
+              Judicial Oversight: Read-only access to Ministry of Home Affairs WORM cryptographic audit ledger.
+            </span>
+            <span className="font-mono text-[10px] bg-sky-100 dark:bg-sky-900 px-2 py-0.5 rounded font-bold">
+              Immutable Insert-Only
+            </span>
+          </div>
+          <AuditLogView lang={lang} />
+        </div>
+      )}
+
+      {/* VIEW 6: OVERVIEW / DEFAULT */}
       {activeTab === 'overview' && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">

@@ -210,10 +210,10 @@ function AppContent() {
 
   // Route Guard per Master Spec Section 4 & 5
   const handleSelectTab = (tabId) => {
-    // Audit Log access control: ONLY AUDITOR can view WORM Audit Vault
+    // Audit Log access control: ONLY AUDITOR & JUDICIAL can view WORM Audit Vault (Sections 8 & 10)
     if (tabId === 'audit') {
-      if (activeUser?.portalRole !== 'AUDITOR') {
-        toast.warning("Access Restricted: The WORM Cryptographic Ledger is strictly restricted to certified Ministry of Home Affairs Auditors.");
+      if (activeUser?.portalRole !== 'AUDITOR' && activeUser?.portalRole !== 'JUDICIAL') {
+        toast.warning("Access Restricted: The WORM Cryptographic Ledger is strictly restricted to certified Ministry of Home Affairs Auditors and Judicial Authorities.");
         return;
       }
     }
@@ -457,7 +457,7 @@ function AppContent() {
             lang={lang}
           />
         ) : currentTab === 'audit' ? (
-          /* WORM Audit Log View - Restricted to Auditor */
+          /* WORM Audit Log View - Accessible to Auditor and Judicial (Sections 8 & 10) */
           activeUser?.portalRole === 'AUDITOR' ? (
             <div className="flex-1 bg-[#FFF9F2] dark:bg-slate-950 p-4 sm:p-8">
               <AuditorDashboard 
@@ -466,14 +466,28 @@ function AppContent() {
                 lang={lang}
               />
             </div>
+          ) : activeUser?.portalRole === 'JUDICIAL' ? (
+            <div className="flex-1 bg-[#FFF9F2] dark:bg-slate-950 p-4 sm:p-8">
+              <div className="max-w-6xl mx-auto space-y-4">
+                <div className="bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800 p-4 rounded-2xl flex items-center justify-between text-xs text-sky-800 dark:text-sky-300">
+                  <span className="font-semibold">
+                    Judicial Oversight: Read-only access to Ministry of Home Affairs WORM cryptographic audit ledger.
+                  </span>
+                  <span className="font-mono text-[10px] bg-sky-100 dark:bg-sky-900 px-2 py-0.5 rounded font-bold">
+                    Immutable Insert-Only
+                  </span>
+                </div>
+                <AuditLogView onBack={() => setCurrentTab('dashboard')} lang={lang} />
+              </div>
+            </div>
           ) : (
             <div className="flex-1 flex items-center justify-center p-8">
               <div className="text-center space-y-3 bg-white dark:bg-slate-900 p-8 rounded-3xl border border-rose-300 dark:border-rose-900 max-w-md">
                 <h3 className="font-bold text-rose-600">Access Restricted</h3>
-                <p className="text-xs text-slate-500">Only authorized Statutory Auditors can inspect the WORM audit trail.</p>
+                <p className="text-xs text-slate-500">Only authorized Statutory Auditors and Judicial Authorities can inspect the WORM audit trail.</p>
                 <button
                   onClick={() => setCurrentTab('home')}
-                  className="px-4 py-2 bg-[#FF6A1A] text-white text-xs font-bold rounded-xl"
+                  className="px-4 py-2 bg-[#FF6A1A] text-white text-xs font-bold rounded-xl cursor-pointer"
                 >
                   Return to Home
                 </button>

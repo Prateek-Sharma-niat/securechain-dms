@@ -156,7 +156,7 @@ export default function Navbar({
             </div>
           )}
 
-          {/* 4. Quorum Approvals (Police, Judicial, Forensic) */}
+          {/* 4. Quorum Approvals & Requests in Navbar */}
           {activeUser && activeUser.portalRole !== 'CITIZEN' && activeUser.portalRole !== 'AUDITOR' && (
             <button
               onClick={() => onSelectTab('approvals')}
@@ -167,7 +167,11 @@ export default function Navbar({
               }`}
             >
               <FileCheck2 className="w-3.5 h-3.5" />
-              <span>{t.navApprovals}</span>
+              <span>
+                {activeUser.portalRole === 'POLICE' 
+                  ? (lang === 'hi' ? 'मेरे अनुरोध (कोरम)' : 'My Requests (Quorum)') 
+                  : (lang === 'hi' ? 'कोरम अनुमोदन' : 'Quorum Approval')}
+              </span>
             </button>
           )}
 
@@ -186,18 +190,20 @@ export default function Navbar({
             </button>
           )}
 
-          {/* 6. Citizen Tracking Link */}
-          <button
-            onClick={() => onSelectTab('citizen')}
-            className={`px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-              currentTab === 'citizen'
-                ? 'bg-[#7B93AD] text-white shadow-sm'
-                : 'text-[#57728E] dark:text-slate-300 hover:text-[#38536E] hover:bg-slate-100 dark:hover:bg-slate-800'
-            }`}
-          >
-            <User className="w-3.5 h-3.5" />
-            <span>{t.navTrackRecords}</span>
-          </button>
+          {/* 6. Citizen Tracking Link (STRICTLY CITIZEN-ONLY: Pre-login or Citizen Cadre) */}
+          {(!activeUser || activeUser.portalRole === 'CITIZEN') && (
+            <button
+              onClick={() => onSelectTab('citizen')}
+              className={`px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                currentTab === 'citizen'
+                  ? 'bg-[#7B93AD] text-white shadow-sm'
+                  : 'text-[#57728E] dark:text-slate-300 hover:text-[#38536E] hover:bg-slate-100 dark:hover:bg-slate-800'
+              }`}
+            >
+              <User className="w-3.5 h-3.5" />
+              <span>{t.navTrackRecords}</span>
+            </button>
+          )}
 
           {/* 7. Legal & Guidelines Dropdown */}
           <div className="relative" ref={helpRef}>
@@ -425,7 +431,11 @@ export default function Navbar({
                   }`}
                 >
                   <FileCheck2 className="w-4 h-4" />
-                  <span>{t.navApprovals}</span>
+                  <span>
+                    {activeUser.portalRole === 'POLICE' 
+                      ? (lang === 'hi' ? 'मेरे अनुरोध (कोरम स्थिति)' : 'My Requests (Quorum Status)') 
+                      : (lang === 'hi' ? 'कोरम अनुमोदन' : 'Quorum Approval')}
+                  </span>
                 </button>
               )}
 
@@ -441,15 +451,17 @@ export default function Navbar({
                 </button>
               )}
 
-              <button
-                onClick={() => { onSelectTab('citizen'); setMobileNavOpen(false); }}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors ${
-                  currentTab === 'citizen' ? 'bg-[#7B93AD] text-white' : 'text-[#57728E] dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-                }`}
-              >
-                <User className="w-4 h-4" />
-                <span>{t.navTrackRecords}</span>
-              </button>
+              {(!activeUser || activeUser.portalRole === 'CITIZEN') && (
+                <button
+                  onClick={() => { onSelectTab('citizen'); setMobileNavOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors ${
+                    currentTab === 'citizen' ? 'bg-[#7B93AD] text-white' : 'text-[#57728E] dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  }`}
+                >
+                  <User className="w-4 h-4" />
+                  <span>{t.navTrackRecords}</span>
+                </button>
+              )}
 
               <button
                 onClick={() => { onSelectTab('contact'); setMobileNavOpen(false); }}

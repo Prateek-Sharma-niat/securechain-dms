@@ -730,7 +730,81 @@ export default function ForensicDashboard({
         </div>
       )}
 
-      {/* VIEW: QUORUM REVIEWS (LINKS TO /approvals) */}
+      {/* VIEW: MY REQUESTS (QUORUM STATUS) — READ-ONLY REQUESTER VIEW */}
+      {currentTab === 'my_requests' && (
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6 animate-in fade-in">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
+            <div>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                Requester Scrutiny View
+              </span>
+              <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 mt-1 font-serif">
+                My Requests (Quorum Status)
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-sans">
+                Read-only tracking of your submitted forensic lab amendments and exhibit findings. Requesters cannot approve their own submissions (Rule 4B lock).
+              </p>
+            </div>
+            <span className="px-3 py-1 bg-amber-50 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800 rounded-xl text-xs font-bold font-mono self-start sm:self-auto">
+              {pendingQuorums.length} Active Requests
+            </span>
+          </div>
+
+          <div className="space-y-4">
+            {pendingQuorums.map(doc => {
+              const session = doc.quorumSession || {
+                threshold: 2,
+                totalEligible: 3,
+                approvalCount: 1,
+                poolLabel: doc.jurisdictionalPool || "District Police Review Pool"
+              };
+              const approvalCount = session.approvalCount || 1;
+              const threshold = session.threshold || 2;
+              const progressPct = Math.min(100, Math.round((approvalCount / threshold) * 100));
+
+              return (
+                <div key={doc.id} className="p-5 rounded-2xl bg-amber-50/30 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/60 space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-xs font-bold text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-800 px-2.5 py-0.5 rounded border border-slate-200 dark:border-slate-700">
+                        {doc.firNo}
+                      </span>
+                      <span className="text-xs font-bold text-amber-700 dark:text-amber-300">
+                        Draft v{doc.draftVersion || '1.1'}
+                      </span>
+                    </div>
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
+                      🔴 Pending Quorum
+                    </span>
+                  </div>
+
+                  <div className="text-xs text-slate-700 dark:text-slate-300">
+                    <div className="font-bold text-slate-900 dark:text-slate-100">{doc.caseTitle}</div>
+                    <p className="mt-0.5">{doc.incidentSummary}</p>
+                  </div>
+
+                  <div className="space-y-1.5 pt-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-semibold text-slate-600 dark:text-slate-400">Approval Progress:</span>
+                      <span className="font-mono text-[11px]">{approvalCount} of {threshold} approvals received</span>
+                    </div>
+                    <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                      <div className="h-full bg-[#5FA777] rounded-full" style={{ width: `${progressPct}%` }} />
+                    </div>
+                  </div>
+
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between pt-1 border-t border-amber-200/50 dark:border-amber-900/30">
+                    <span>Routing: <strong>{session.poolLabel || doc.jurisdictionalPool || "District Police Review Pool"}</strong></span>
+                    <span className="text-amber-700 dark:text-amber-300 font-medium">Read-Only: Requester cannot vote on own submitted findings</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* VIEW: QUORUM REVIEWS (ACTIONABLE APPROVAL MODE) */}
       {(currentTab === 'reviews' || currentTab === 'approvals') && (
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6 animate-in fade-in">
           <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">

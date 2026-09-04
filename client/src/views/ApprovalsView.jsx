@@ -37,14 +37,30 @@ export default function ApprovalsView({
   onVoteSuccess,
   onBack,
   onBackToDashboard,
+  initialTab = 'approvals', // 'approvals' | 'my_requests'
   lang = 'en'
 }) {
   const handleBack = onBack || onBackToDashboard;
   const t = translations[lang] || translations.en;
   const toast = useToast();
 
+  const userRole = activeUser?.portalRole || 'POLICE';
+  const defaultTab = userRole === 'POLICE' ? 'my_requests' : (initialTab || 'approvals');
+  const [activeViewTab, setActiveViewTab] = useState(defaultTab);
+
   const pendingDocs = documents.filter(d => d.status === 'PENDING_QUORUM');
-  const [expandedDocId, setExpandedDocId] = useState(pendingDocs[0]?.id || null);
+  
+  // Split into own requests vs peer review requests
+  const myRequests = pendingDocs.filter(d => 
+    d.requesterId === activeUser?.id || d.authorId === activeUser?.id || (userRole === 'POLICE')
+  );
+  const actionablePeerReviews = pendingDocs.filter(d => 
+    d.requesterId !== activeUser?.id && d.authorId !== activeUser?.id
+  );
+
+  const displayDocs = activeViewTab === 'my_requests' ? myRequests : (userRole === 'JUDICIAL' ? pendingDocs : actionablePeerReviews);
+
+  const [expandedDocId, setExpandedDocId] = useState(displayDocs[0]?.id || null);
   const [votingId, setVotingId] = useState(null);
   const [voteComment, setVoteComment] = useState('');
 
@@ -105,31 +121,67 @@ export default function ApprovalsView({
               M-of-N Multi-Officer Governance
             </span>
             <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight mt-1 font-serif">
-              Quorum Approval Queue
+              {activeViewTab === 'my_requests' 
+                ? (lang === 'hi' ? 'मेरे अनुरोध (कोरम स्थिति)' : 'My Requests (Quorum Status)')
+                : (lang === 'hi' ? 'कोरम अनुमोदन बोर्ड' : 'Quorum Approval Queue')}
             </h1>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-sans">
-              Independent multi-cadre consensus terminal. No single official can alter an evidence docket unilaterally.
+              {activeViewTab === 'my_requests'
+                ? "Requester-side read-only tracking of your submitted amendment dockets. Peer officer consensus is required."
+                : "Actionable consensus board. Review peer amendment dockets and cast supervisory approval votes."}
             </p>
           </div>
 
           <div className="flex items-center gap-2">
             <span className="px-3.5 py-1.5 bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 font-bold text-xs rounded-xl border border-amber-300 dark:border-amber-800 flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5" />
-              <span>{pendingDocs.length} Pending Sessions</span>
+              <span>{displayDocs.length} Active Sessions</span>
             </span>
           </div>
         </div>
 
-        {/* List of Pending Approval Cards */}
-        {pendingDocs.length === 0 ? (
+        {/* Cadre-Scoped Tab Switcher (Master Spec Section 12) */}
+        {userRole === 'FORENSIC' && (
+          <div className="flex items-center gap-2 p-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-fit">
+            <button
+              onClick={() => setActiveViewTab('approvals')}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                activeViewTab === 'approvals'
+                  ? 'bg-[#FF6A1A] text-white shadow-xs'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
+              }`}
+            >
+              <FileCheck2 className="w-3.5 h-3.5" />
+              <span>Quorum Approval ({actionablePeerReviews.length})</span>
+            </button>
+            <button
+              onClick={() => setActiveViewTab('my_requests')}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                activeViewTab === 'my_requests'
+                  ? 'bg-[#FF6A1A] text-white shadow-xs'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
+              }`}
+            >
+              <Clock className="w-3.5 h-3.5" />
+              <span>My Requests ({myRequests.length})</span>
+            </button>
+          </div>
+        )}
+
+        {/* List of Approval / Request Cards */}
+        {displayDocs.length === 0 ? (
           <EmptyState
             icon={FileCheck2}
-            title="No Pending Approvals"
-            description="All case dockets and supplementary amendments have achieved full consensus or are locked."
+            title={activeViewTab === 'my_requests' ? "No Pending Edit Requests" : "No Pending Approvals"}
+            description={
+              activeViewTab === 'my_requests'
+                ? "You currently have no amendment dockets awaiting peer review."
+                : "All case dockets and supplementary amendments have achieved full consensus or are locked."
+            }
           />
         ) : (
           <div className="space-y-4">
-            {pendingDocs.map((doc) => {
+            {displayDocs.map((doc) => {
               const session = doc.quorumSession || {
                 threshold: 2,
                 totalEligible: 3,
@@ -259,8 +311,18 @@ export default function ApprovalsView({
                     </div>
                   </div>
 
-                  {/* Conflict of Interest / Self-Approval Block Notice */}
-                  {isRequester ? (
+                  {/* Actions Area: Read-Only for My Requests vs Actionable for Quorum Approval */}
+                  {activeViewTab === 'my_requests' ? (
+                    <div className="p-3 bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-900/60 rounded-2xl text-xs text-amber-800 dark:text-amber-300 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <Lock className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                        <span><strong>Requester View:</strong> Requesters cannot approve their own submissions (Rule 4B anti-conflict lock).</span>
+                      </div>
+                      <span className="font-mono text-[11px] font-semibold">
+                        Awaiting peer consensus
+                      </span>
+                    </div>
+                  ) : isRequester ? (
                     <div className="p-3 bg-amber-50 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-800 rounded-2xl text-xs text-amber-800 dark:text-amber-200 flex items-center gap-2">
                       <Lock className="w-4 h-4 text-amber-600 flex-shrink-0" />
                       <span>
