@@ -162,6 +162,22 @@ function AppContent() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeUser]);
 
+  // Strict Route Guard per Master Spec Section 23
+  useEffect(() => {
+    if (activeUser) {
+      // If logged in, they cannot visit home or login pages.
+      if (currentTab === 'home' || currentTab === 'login') {
+        setCurrentTab(activeUser.portalRole === 'CITIZEN' ? 'citizen' : 'dashboard');
+      }
+    } else {
+      // If not logged in, they can only visit public pages.
+      if (['dashboard', 'cases', 'approvals', 'audit', 'citizen'].includes(currentTab)) {
+        setLoginRoleIntent('POLICE');
+        setCurrentTab('login');
+      }
+    }
+  }, [activeUser, currentTab]);
+
   // Fetch initial data from backend
   const fetchAllData = async () => {
     try {

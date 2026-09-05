@@ -15,10 +15,10 @@ export default function MainHeader({ lang = 'en' }) {
   return (
     <header className="bg-[#FFF9F2] border-b border-slate-200 py-2.5 sm:py-3.5 px-2 sm:px-4 md:px-6 select-none w-full">
       <div className="w-full flex items-center justify-between">
-        
+
         {/* Left: Ashoka Stambh + Bilingual Title Stack in the Left Corner */}
         <div className="flex items-center space-x-2.5 sm:space-x-3.5">
-          
+
           {/* Authentic Ashoka Stambh Silhouette */}
           <AshokaEmblem className="w-11 h-15 sm:w-14 sm:h-18" color="#12161C" />
 
@@ -28,7 +28,7 @@ export default function MainHeader({ lang = 'en' }) {
             <h1 className="text-sm sm:text-base md:text-lg font-bold text-slate-900 tracking-tight leading-snug font-['Noto_Sans_Devanagari',sans-serif]">
               {t.appTitleHindi}
             </h1>
-            
+
             {/* English Line Below */}
             <h2 className="text-xs sm:text-sm md:text-base font-extrabold text-[#FF6A1A] tracking-tight leading-tight">
               {t.appTitleEnglish}
@@ -52,7 +52,7 @@ export default function MainHeader({ lang = 'en' }) {
             <span className="inline-block px-2 py-0.5 text-[10px] font-bold text-slate-700 bg-amber-100/80 border border-amber-300 rounded">
               GOI Official Portal
             </span>
-            <div className="text-[9px] text-slate-500 font-mono mt-0.5">CrPC 154 / BSA 63 Certified</div>
+            <div className="text-[9px] text-slate-500 font-mono mt-0.5">Government Of India</div>
           </div>
         </div>
 

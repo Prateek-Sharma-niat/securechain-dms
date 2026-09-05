@@ -27,7 +27,7 @@ export default function Footer({ lang = 'en' }) {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-white dark:bg-[#12161C] border-t border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 text-xs select-none transition-colors w-full">
+    <footer className="bg-slate-50 dark:bg-[#0A0D14] border-t border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 text-xs select-none transition-colors w-full">
       
       {/* 1. Four-Column Link Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-8 py-10 sm:py-12">
