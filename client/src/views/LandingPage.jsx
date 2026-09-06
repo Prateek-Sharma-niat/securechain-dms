@@ -42,7 +42,9 @@ import { translations } from '../i18n/translations';
  * - Dark mode and full bilingual support
  */
 export default function LandingPage({ 
-  onGoToLogin, 
+  onOpenRoleLogin,
+  onGoToDashboard,
+  onGoToCitizen,
   activeUser, 
   metrics,
   lang = 'en'
@@ -134,20 +136,47 @@ export default function LandingPage({
         </div>
       </div>
 
-      {/* 2. Hero Section with India Motif Watermark (Section 22) */}
+      {/* 2. Hero Section with Indian Flag Watermark (Section 22) */}
       <section className="relative px-4 sm:px-8 pt-12 sm:pt-16 pb-14 max-w-7xl mx-auto w-full overflow-hidden">
-        {/* Subtle India & Justice Scales Watermark (Section 22) */}
-        <div className="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden">
-          <svg 
-            className="w-[580px] h-[580px] opacity-[0.09] dark:opacity-[0.06] text-orange-600 dark:text-orange-400 select-none"
-            viewBox="0 0 200 200" 
-            fill="currentColor"
+        {/* Indian Flag Tricolor Watermark — subtle horizontal bands + Ashoka Chakra */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-3xl" aria-hidden="true">
+          {/* Saffron band */}
+          <div className="absolute inset-x-0 top-0 h-1/3 bg-[#FF9933] opacity-[0.10] dark:opacity-[0.07]" />
+          {/* White band */}
+          <div className="absolute inset-x-0 top-1/3 h-1/3 bg-white opacity-[0.08] dark:opacity-[0.04]" />
+          {/* Green band */}
+          <div className="absolute inset-x-0 top-2/3 h-1/3 bg-[#138808] opacity-[0.10] dark:opacity-[0.07]" />
+          {/* Ashoka Chakra — centered SVG wheel watermark */}
+          <svg
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[380px] h-[380px] sm:w-[480px] sm:h-[480px] opacity-[0.09] dark:opacity-[0.06] select-none"
+            viewBox="0 0 200 200"
+            fill="none"
             aria-hidden="true"
           >
-            {/* Stylized India Geographical Silhouette & Scales Motif */}
-            <path d="M100 10 C105 18, 115 22, 118 28 C122 36, 130 40, 138 48 C145 55, 142 62, 140 70 C138 78, 144 85, 146 95 C148 105, 140 115, 135 125 C130 135, 122 145, 115 158 C110 168, 105 178, 100 190 C95 178, 90 168, 85 158 C78 145, 70 135, 65 125 C60 115, 52 105, 54 95 C56 85, 62 78, 60 70 C58 62, 55 55, 62 48 C70 40, 78 36, 82 28 C85 22, 95 18, 100 10 Z" />
-            <circle cx="100" cy="85" r="28" fill="none" stroke="currentColor" strokeWidth="2.5" strokeDasharray="3 2" />
-            <path d="M72 85 L128 85 M100 58 L100 112 M76 75 L62 98 L90 98 Z M124 75 L110 98 L138 98 Z" stroke="currentColor" strokeWidth="2" fill="none" />
+            {/* Outer ring */}
+            <circle cx="100" cy="100" r="90" stroke="#000080" strokeWidth="4" />
+            {/* Inner ring */}
+            <circle cx="100" cy="100" r="78" stroke="#000080" strokeWidth="2" />
+            {/* Hub */}
+            <circle cx="100" cy="100" r="10" fill="#000080" />
+            {/* 24 spokes */}
+            {Array.from({ length: 24 }).map((_, i) => {
+              const angle = (i * 360) / 24;
+              const rad = (angle * Math.PI) / 180;
+              const x1 = 100 + 10 * Math.cos(rad);
+              const y1 = 100 + 10 * Math.sin(rad);
+              const x2 = 100 + 78 * Math.cos(rad);
+              const y2 = 100 + 78 * Math.sin(rad);
+              return (
+                <line
+                  key={i}
+                  x1={x1.toFixed(2)} y1={y1.toFixed(2)}
+                  x2={x2.toFixed(2)} y2={y2.toFixed(2)}
+                  stroke="#000080"
+                  strokeWidth="2"
+                />
+              );
+            })}
           </svg>
         </div>
 
@@ -170,7 +199,7 @@ export default function LandingPage({
           {/* SINGLE Unified Login CTA (per Master Spec Section 3) */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-3">
             <button
-              onClick={() => onGoToLogin('CITIZEN')}
+              onClick={() => onOpenRoleLogin('POLICE')}
               className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-[#FF6A1A] to-[#FF8C42] hover:from-[#E85B0E] text-white font-bold text-xs sm:text-sm rounded-2xl shadow-lg hover:shadow-orange-500/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2.5 cursor-pointer"
             >
               <Lock className="w-4 h-4" />
