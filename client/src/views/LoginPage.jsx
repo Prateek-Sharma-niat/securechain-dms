@@ -43,29 +43,29 @@ export default function LoginPage({
   
   // Citizen state
   const [citizenMode, setCitizenMode] = useState('MOBILE'); // 'MOBILE' | 'ACK'
-  const [mobileNumber, setMobileNumber] = useState('9876543210');
-  const [ackNumber, setAckNumber] = useState('ACK-2024-88412');
-  const [citizenSecondFactor, setCitizenSecondFactor] = useState('citizen.delhi@gov.in');
-  const [citizenOtp, setCitizenOtp] = useState('123456');
+  const [mobileNumber, setMobileNumber] = useState('');
+  const [ackNumber, setAckNumber] = useState('');
+  const [citizenSecondFactor, setCitizenSecondFactor] = useState('');
+  const [citizenOtp, setCitizenOtp] = useState('');
 
-  // Police state
-  const [policeId, setPoliceId] = useState('POL-DL-4892');
-  const [policeStation, setPoliceStation] = useState('Special Investigation Division PS, Mandir Marg');
-  const [policePassword, setPolicePassword] = useState('123456');
+  // Police state — all blank on page load
+  const [policeId, setPoliceId] = useState('');
+  const [policeStation, setPoliceStation] = useState('');
+  const [policePassword, setPolicePassword] = useState('');
 
-  // Judicial state
-  const [judicialId, setJudicialId] = useState('JUD-ND-1044');
-  const [judicialCourt, setJudicialCourt] = useState('Patiala House Courts, New Delhi');
-  const [judicialPassword, setJudicialPassword] = useState('123456');
+  // Judicial state — all blank on page load
+  const [judicialId, setJudicialId] = useState('');
+  const [judicialCourt, setJudicialCourt] = useState('');
+  const [judicialPassword, setJudicialPassword] = useState('');
 
-  // Forensic state
-  const [forensicId, setForensicId] = useState('FSL-EXP-209');
-  const [forensicLab, setForensicLab] = useState('CFSL New Delhi');
-  const [forensicPassword, setForensicPassword] = useState('123456');
+  // Forensic state — all blank on page load
+  const [forensicId, setForensicId] = useState('');
+  const [forensicLab, setForensicLab] = useState('');
+  const [forensicPassword, setForensicPassword] = useState('');
 
-  // Auditor state
-  const [auditorId, setAuditorId] = useState('AUD-MHA-007');
-  const [auditorPassword, setAuditorPassword] = useState('123456');
+  // Auditor state — all blank on page load
+  const [auditorId, setAuditorId] = useState('');
+  const [auditorPassword, setAuditorPassword] = useState('');
 
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -76,6 +76,7 @@ export default function LoginPage({
   };
 
   // Submit Official Cadre Login
+  // extraData: typed location fields (policeStation / court / labUnit) to merge into the returned user
   const handleOfficerLogin = async (e, rolePortal, employeeId, password, extraData = {}) => {
     e.preventDefault();
     setLoading(true);
@@ -95,8 +96,11 @@ export default function LoginPage({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Authentication rejected by credential gateway.');
 
-      toast.success(`Authenticated successfully as ${data.user.name} (${data.user.role || data.user.rank})`);
-      onLoginSuccess(data.user);
+      // Merge any typed location fields so ProfileCard displays what the user entered
+      const enrichedUser = { ...data.user, ...extraData };
+
+      toast.success(`Authenticated successfully as ${enrichedUser.name} (${enrichedUser.role || enrichedUser.rank})`);
+      onLoginSuccess(enrichedUser);
     } catch (err) {
       setErrorMsg(err.message);
       toast.error(err.message);
@@ -329,7 +333,7 @@ export default function LoginPage({
 
           {/* ================= 2. POLICE TAB ================= */}
           {activeTab === 'POLICE' && (
-            <form onSubmit={(e) => handleOfficerLogin(e, 'POLICE', policeId, policePassword)} className="space-y-4">
+            <form onSubmit={(e) => handleOfficerLogin(e, 'POLICE', policeId, policePassword, { policeStation })} className="space-y-4">
               <div className="space-y-1">
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
                   Badge ID / Police Official Employee ID
@@ -340,6 +344,7 @@ export default function LoginPage({
                   onChange={(e) => setPoliceId(e.target.value)}
                   placeholder="e.g. POL-DL-4892"
                   required
+                  autoComplete="off"
                   className="w-full px-3.5 py-2.5 text-xs font-mono font-bold bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#FF6A1A] uppercase"
                 />
               </div>
@@ -348,16 +353,14 @@ export default function LoginPage({
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
                   Police Station (Jurisdiction)
                 </label>
-                <select
+                <input
+                  type="text"
                   value={policeStation}
                   onChange={(e) => setPoliceStation(e.target.value)}
+                  placeholder="e.g. Special Investigation Division PS, Mandir Marg"
+                  autoComplete="off"
                   className="w-full px-3.5 py-2.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#FF6A1A]"
-                >
-                  <option value="Special Investigation Division PS, Mandir Marg">Special Investigation Division PS, Mandir Marg (Delhi)</option>
-                  <option value="State Criminal Investigation Department, Mumbai">State Criminal Investigation Department, Mumbai</option>
-                  <option value="Central Police Station, CID Headquarters, Bengaluru">Central Police Station, CID Headquarters, Bengaluru</option>
-                  <option value="Central Bureau of Investigation (CBI) Investigation Cell">Central Bureau of Investigation (CBI) Cell</option>
-                </select>
+                />
               </div>
 
               <PasswordField
@@ -390,7 +393,7 @@ export default function LoginPage({
 
           {/* ================= 3. JUDICIAL TAB ================= */}
           {activeTab === 'JUDICIAL' && (
-            <form onSubmit={(e) => handleOfficerLogin(e, 'JUDICIAL', judicialId, judicialPassword)} className="space-y-4">
+            <form onSubmit={(e) => handleOfficerLogin(e, 'JUDICIAL', judicialId, judicialPassword, { court: judicialCourt })} className="space-y-4">
               <div className="space-y-1">
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
                   Judicial ID / Bar Council Roll No.
@@ -401,6 +404,7 @@ export default function LoginPage({
                   onChange={(e) => setJudicialId(e.target.value)}
                   placeholder="e.g. JUD-ND-1044"
                   required
+                  autoComplete="off"
                   className="w-full px-3.5 py-2.5 text-xs font-mono font-bold bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#4FA8E0] uppercase"
                 />
               </div>
@@ -409,16 +413,14 @@ export default function LoginPage({
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
                   Court / Jurisdiction
                 </label>
-                <select
+                <input
+                  type="text"
                   value={judicialCourt}
                   onChange={(e) => setJudicialCourt(e.target.value)}
+                  placeholder="e.g. Patiala House Courts, New Delhi"
+                  autoComplete="off"
                   className="w-full px-3.5 py-2.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#4FA8E0]"
-                >
-                  <option value="Patiala House Courts, New Delhi">Patiala House District Courts, New Delhi</option>
-                  <option value="High Court of Delhi">High Court of Delhi (Special Evidence Bench)</option>
-                  <option value="City Civil and Sessions Court, Mumbai">City Civil & Sessions Court, Mumbai</option>
-                  <option value="Chief Metropolitan Magistrate Court, Bengaluru">Chief Metropolitan Magistrate Court, Bengaluru</option>
-                </select>
+                />
               </div>
 
               <PasswordField
@@ -451,7 +453,7 @@ export default function LoginPage({
 
           {/* ================= 4. FORENSIC TAB ================= */}
           {activeTab === 'FORENSIC' && (
-            <form onSubmit={(e) => handleOfficerLogin(e, 'FORENSIC', forensicId, forensicPassword)} className="space-y-4">
+            <form onSubmit={(e) => handleOfficerLogin(e, 'FORENSIC', forensicId, forensicPassword, { labUnit: forensicLab })} className="space-y-4">
               <div className="space-y-1">
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
                   Forensic Officer Lab ID / Employee ID
@@ -462,6 +464,7 @@ export default function LoginPage({
                   onChange={(e) => setForensicId(e.target.value)}
                   placeholder="e.g. FSL-EXP-209"
                   required
+                  autoComplete="off"
                   className="w-full px-3.5 py-2.5 text-xs font-mono font-bold bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#5FA777] uppercase"
                 />
               </div>
@@ -470,16 +473,14 @@ export default function LoginPage({
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
                   Forensic Laboratory / Unit
                 </label>
-                <select
+                <input
+                  type="text"
                   value={forensicLab}
                   onChange={(e) => setForensicLab(e.target.value)}
+                  placeholder="e.g. Central Forensic Science Laboratory (CFSL), New Delhi"
+                  autoComplete="off"
                   className="w-full px-3.5 py-2.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#5FA777]"
-                >
-                  <option value="CFSL New Delhi">Central Forensic Science Laboratory (CFSL), New Delhi</option>
-                  <option value="CFSL Hyderabad">Central Forensic Science Laboratory (CFSL), Hyderabad</option>
-                  <option value="CFSL Chandigarh">Central Forensic Science Laboratory (CFSL), Chandigarh</option>
-                  <option value="State FSL Mumbai">State Forensic Science Laboratory, Mumbai</option>
-                </select>
+                />
               </div>
 
               <PasswordField
@@ -559,11 +560,11 @@ export default function LoginPage({
             </form>
           )}
 
-          {/* Quick Demo Fill Pills with Generic Role Titles */}
+          {/* Quick Demo Fill Pills — fills all fields for convenience; does NOT pre-fill on page load */}
           <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-2">
             <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300">
               <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-              <span>Quick Demo Role Fill (Generic Titles)</span>
+              <span>Quick Demo Fill (Generic Titles)</span>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5 text-left">
               <button
@@ -584,6 +585,7 @@ export default function LoginPage({
                 onClick={() => {
                   setActiveTab('POLICE');
                   setPoliceId('POL-DL-4892');
+                  setPoliceStation('Special Investigation Division PS, Mandir Marg');
                   setPolicePassword('123456');
                 }}
                 className="p-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-orange-400 transition-colors cursor-pointer"
@@ -596,6 +598,7 @@ export default function LoginPage({
                 onClick={() => {
                   setActiveTab('JUDICIAL');
                   setJudicialId('JUD-ND-1044');
+                  setJudicialCourt('Patiala House Courts, New Delhi');
                   setJudicialPassword('123456');
                 }}
                 className="p-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-sky-400 transition-colors cursor-pointer"
@@ -608,6 +611,7 @@ export default function LoginPage({
                 onClick={() => {
                   setActiveTab('FORENSIC');
                   setForensicId('FSL-EXP-209');
+                  setForensicLab('Central Forensic Science Laboratory (CFSL), New Delhi');
                   setForensicPassword('123456');
                 }}
                 className="p-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-emerald-400 transition-colors cursor-pointer"

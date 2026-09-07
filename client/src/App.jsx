@@ -444,6 +444,7 @@ function AppContent() {
           /* Citizen Record Portal */
           <CitizenPortalView
             lang={lang}
+            activeUser={activeUser}
             onBackToHome={() => handleSelectTab('home')}
           />
         ) : currentTab === 'dashboard' || currentTab === 'cases' ? (

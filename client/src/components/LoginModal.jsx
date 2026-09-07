@@ -47,7 +47,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, personas =
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fadeIn">
       {/* Centered White Card on Dark Blurred Background */}
       <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden text-slate-800">
-        
+
         {/* Tricolor top border */}
         <div className="tricolor-stripe"></div>
 
@@ -83,7 +83,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, personas =
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1.5 uppercase tracking-wider">
-                Employee / Cadre ID
+                Employee / Official ID
               </label>
               <div className="relative">
                 <input
@@ -155,11 +155,10 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, personas =
                   key={p.id}
                   type="button"
                   onClick={() => handleSelectPersona(p)}
-                  className={`text-left p-2 rounded-lg border text-[11px] transition-all cursor-pointer ${
-                    employeeId === p.id 
-                      ? 'border-blue-600 bg-blue-50/80 text-blue-950 font-semibold' 
+                  className={`text-left p-2 rounded-lg border text-[11px] transition-all cursor-pointer ${employeeId === p.id
+                      ? 'border-blue-600 bg-blue-50/80 text-blue-950 font-semibold'
                       : 'border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700'
-                  }`}
+                    }`}
                 >
                   <div className="truncate font-bold">{p.name.split(' ')[1] || p.name}</div>
                   <div className="text-[10px] text-slate-500 truncate">{p.rank}</div>
@@ -170,8 +169,8 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, personas =
 
           {/* Trouble Logging In Link */}
           <div className="mt-5 text-center">
-            <a 
-              href="#help" 
+            <a
+              href="#help"
               onClick={(e) => { e.preventDefault(); alert("National Cyber Helpline: 1930\nFor demo testing, use Employee ID 'POL-DL-4892' with OTP '123456'."); }}
               className="text-xs text-slate-500 hover:text-slate-800 transition-colors"
             >

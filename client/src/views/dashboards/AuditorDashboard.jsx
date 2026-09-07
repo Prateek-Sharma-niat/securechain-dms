@@ -24,10 +24,11 @@ import {
   Check,
   ShieldAlert
 } from 'lucide-react';
-import AuditLogView from '../AuditLogView';
-import { useToast } from '../../context/ToastContext';
 import { translations } from '../../i18n/translations';
+import { useToast } from '../../context/ToastContext';
+import AuditLogView from '../AuditLogView';
 import RoleSettingsPanel from '../../components/RoleSettingsPanel';
+import ProfileCard from '../../components/ProfileCard';
 
 
 export default function AuditorDashboard({ 
@@ -273,6 +274,16 @@ export default function AuditorDashboard({
       {/* VIEW: OVERVIEW / HOME */}
       {(currentTab === 'overview' || currentTab === 'home') && (
         <div className="space-y-6 animate-in fade-in">
+          
+          {/* Profile Card — identity + My Work snapshot */}
+          <ProfileCard
+            activeUser={activeUser}
+            role="AUDITOR"
+            documents={documents}
+            lang={lang}
+            onGoToSettings={() => setCurrentTab('settings')}
+          />
+
           {/* Cryptographic Health Summary Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Card 1: Chain Integrity */}

@@ -27,6 +27,7 @@ import { translations } from '../../i18n/translations';
 import DragDropUploader from '../../components/DragDropUploader';
 import { useToast } from '../../context/ToastContext';
 import RoleSettingsPanel from '../../components/RoleSettingsPanel';
+import ProfileCard from '../../components/ProfileCard';
 
 
 export default function ForensicDashboard({ 
@@ -248,6 +249,16 @@ export default function ForensicDashboard({
       {/* VIEW: OVERVIEW / HOME */}
       {(currentTab === 'overview' || currentTab === 'home') && (
         <div className="space-y-6 animate-in fade-in">
+
+          {/* Profile Card — identity + My Work snapshot */}
+          <ProfileCard
+            activeUser={activeUser}
+            role="FORENSIC"
+            documents={documents}
+            lang={lang}
+            onGoToSettings={() => setCurrentTab('settings')}
+          />
+
           {/* Grid: 3 Metric Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             

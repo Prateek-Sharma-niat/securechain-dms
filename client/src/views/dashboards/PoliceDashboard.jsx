@@ -28,6 +28,7 @@ import { translations } from '../../i18n/translations';
 import DragDropUploader from '../../components/DragDropUploader';
 import { useToast } from '../../context/ToastContext';
 import RoleSettingsPanel from '../../components/RoleSettingsPanel';
+import ProfileCard from '../../components/ProfileCard';
 
 
 /**
@@ -57,9 +58,9 @@ export default function PoliceDashboard({
   const toast = useToast();
   const [droppedFile, setDroppedFile] = useState(null);
 
-  // Filter cases assigned to this officer or general station cases
-  const myCases = documents;
-  const pendingRequests = documents.filter(d => d.status === 'PENDING_QUORUM');
+  // Filter strictly to this officer's own cases by requesterId
+  const myCases = documents.filter(d => d.requesterId === activeUser?.id);
+  const pendingRequests = myCases.filter(d => d.status === 'PENDING_QUORUM');
 
   const custodyEvents = [
     { step: "Seizure Memo Form No. 24 Issued", time: "14/08/2024 10:45 IST", actor: "Police Official (Investigating Officer)", status: "Completed" },
@@ -351,6 +352,16 @@ export default function PoliceDashboard({
       {/* VIEW 5: OVERVIEW (Default) */}
       {activeTab === 'overview' && (
         <div className="space-y-6 animate-in fade-in">
+
+          {/* Profile Card — identity + My Work snapshot */}
+          <ProfileCard
+            activeUser={activeUser}
+            role="POLICE"
+            documents={documents}
+            lang={lang}
+            onGoToSettings={() => {}}
+          />
+
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
             
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs space-y-2">

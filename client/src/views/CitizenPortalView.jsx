@@ -25,20 +25,22 @@ import DragDropUploader from '../components/DragDropUploader';
 import { Skeleton, SkeletonTable } from '../components/Skeleton';
 import EmptyState from '../components/EmptyState';
 import { useToast } from '../context/ToastContext';
+import ProfileCard from '../components/ProfileCard';
 
 export default function CitizenPortalView({ 
   lang = 'en', 
+  activeUser,
   onBackToHome 
 }) {
   const t = translations[lang] || translations.en;
   const toast = useToast();
 
   // Authentication State
-  const [citizenSession, setCitizenSession] = useState(null);
+  const [citizenSession, setCitizenSession] = useState(activeUser || null);
   const [loginTab, setLoginTab] = useState('mobile'); // 'mobile' | 'ack'
-  const [mobileNumber, setMobileNumber] = useState('9876543210');
-  const [ackNumber, setAckNumber] = useState('FIR-2024-ND-0842');
-  const [otp, setOtp] = useState('123456');
+  const [mobileNumber, setMobileNumber] = useState('');
+  const [ackNumber, setAckNumber] = useState('');
+  const [otp, setOtp] = useState('');
   const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [fetchingRecords, setFetchingRecords] = useState(false);
@@ -314,6 +316,15 @@ export default function CitizenPortalView({
           /* VIEW 2: CITIZEN MY-RECORDS VIEW */
           <div className="space-y-6">
             
+            {/* Profile Card */}
+            <ProfileCard
+              activeUser={citizenSession}
+              role="CITIZEN"
+              documents={records}
+              lang={lang}
+              onGoToSettings={() => {}}
+            />
+
             {/* Welcome Citizen Header */}
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors w-full">
               <div>
@@ -336,11 +347,6 @@ export default function CitizenPortalView({
                   <UploadCloud className="w-4 h-4 text-orange-500" />
                   <span>{showAttachUploader ? 'Hide Evidence Uploader' : '+ Lodge Evidence / Complaint'}</span>
                 </button>
-
-                <div className="text-right text-xs">
-                  <div className="font-bold text-slate-800 dark:text-slate-200">{citizenSession.name}</div>
-                  <div className="text-slate-500 dark:text-slate-400 font-mono text-[11px]">{citizenSession.mobile}</div>
-                </div>
               </div>
             </div>
 

@@ -28,6 +28,7 @@ import { useToast } from '../../context/ToastContext';
 import AuditLogView from '../AuditLogView';
 import ApprovalsView from '../ApprovalsView';
 import RoleSettingsPanel from '../../components/RoleSettingsPanel';
+import ProfileCard from '../../components/ProfileCard';
 
 
 /**
@@ -423,6 +424,16 @@ export default function JudicialDashboard({
       {/* VIEW 6: OVERVIEW / DEFAULT */}
       {activeTab === 'overview' && (
         <div className="space-y-6">
+
+          {/* Profile Card — identity + My Work snapshot */}
+          <ProfileCard
+            activeUser={activeUser}
+            role="JUDICIAL"
+            documents={documents}
+            lang={lang}
+            onGoToSettings={() => {}}
+          />
+
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
             
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs space-y-2">
