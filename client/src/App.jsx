@@ -4,7 +4,7 @@ import MainHeader from './components/MainHeader';
 import FlagBanner from './components/FlagBanner';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import RoleLoginModal from './components/RoleLoginModal';
+
 import UploadModal from './components/UploadModal';
 import QuorumModal from './components/QuorumModal';
 import ShortcutsModal from './components/ShortcutsModal';
@@ -404,6 +404,7 @@ function AppContent() {
             onLoginSuccess={handleLoginSuccess}
             onCancel={() => setCurrentTab('home')}
             initialRole={loginRoleIntent}
+            personas={personas}
           />
         ) : selectedDoc && !isViewingChain ? (
           /* Dedicated Real Indian FIR Document Viewer (CrPC 154) */

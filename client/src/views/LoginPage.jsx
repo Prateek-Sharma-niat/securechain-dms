@@ -36,7 +36,8 @@ import { useToast } from '../context/ToastContext';
 export default function LoginPage({
   onLoginSuccess,
   onCancel,
-  initialRole = 'CITIZEN'
+  initialRole = 'CITIZEN',
+  personas = []
 }) {
   const toast = useToast();
   const [activeTab, setActiveTab] = useState(initialRole.toUpperCase()); // 'CITIZEN' | 'POLICE' | 'JUDICIAL' | 'FORENSIC' | 'AUDITOR'
@@ -75,38 +76,33 @@ export default function LoginPage({
     setErrorMsg('');
   };
 
-  // Submit Official Cadre Login
-  // extraData: typed location fields (policeStation / court / labUnit) to merge into the returned user
   const handleOfficerLogin = async (e, rolePortal, employeeId, password, extraData = {}) => {
     e.preventDefault();
     setLoading(true);
     setErrorMsg('');
 
-    try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          employeeId: employeeId.trim(),
-          otp: password.trim(),
-          rolePortal
-        })
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Authentication rejected by credential gateway.');
+    setTimeout(() => {
+      // Find matching persona or fallback to the first one for demo purposes
+      let match = personas.find(p => p.id === employeeId.trim() && p.portalRole === rolePortal);
+      
+      if (!match) {
+        // Fallback demo mechanism if user types random id but uses correct password '123456'
+        if (password.trim() === '123456') {
+           match = personas.find(p => p.portalRole === rolePortal) || personas[0];
+        } else {
+          setErrorMsg('Authentication rejected by credential gateway. Invalid credentials.');
+          setLoading(false);
+          return;
+        }
+      }
 
       // Merge any typed location fields so ProfileCard displays what the user entered
-      const enrichedUser = { ...data.user, ...extraData };
+      const enrichedUser = { ...match, ...extraData };
 
       toast.success(`Authenticated successfully as ${enrichedUser.name} (${enrichedUser.role || enrichedUser.rank})`);
       onLoginSuccess(enrichedUser);
-    } catch (err) {
-      setErrorMsg(err.message);
-      toast.error(err.message);
-    } finally {
       setLoading(false);
-    }
+    }, 600);
   };
 
   // Submit Citizen Login
@@ -115,36 +111,29 @@ export default function LoginPage({
     setLoading(true);
     setErrorMsg('');
 
-    try {
-      const res = await fetch('/api/citizen/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          mobileNumber: citizenMode === 'MOBILE' ? mobileNumber.trim() : undefined,
-          ackNumber: citizenMode === 'ACK' ? ackNumber.trim() : undefined,
-          secondFactor: citizenMode === 'ACK' ? citizenSecondFactor.trim() : undefined,
-          otp: citizenOtp.trim() || '123456'
-        })
-      });
+    setTimeout(() => {
+      // For demo purposes, any valid OTP works
+      if (citizenOtp.trim() !== '123456') {
+        setErrorMsg('Citizen credential validation failed. Invalid OTP.');
+        setLoading(false);
+        return;
+      }
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Citizen credential validation failed.');
+      // Provide generic citizen persona details merged with inputted ID
+      const activeMobile = citizenMode === 'MOBILE' ? mobileNumber.trim() : '9876543210';
+      const activeAck = citizenMode === 'ACK' ? ackNumber.trim() : 'ACK-GEN-0001';
 
-      toast.success(`Authenticated as Citizen Complainant (${data.citizen.name})`);
+      toast.success(`Authenticated as Citizen Complainant (Arjun Rao)`);
       onLoginSuccess({
-        id: data.citizen.id,
-        name: data.citizen.name,
+        id: 'CIT-892',
+        name: 'Arjun Rao',
         role: 'Verified Citizen Complainant',
         portalRole: 'CITIZEN',
-        mobile: data.citizen.mobile,
-        ackNumber: data.citizen.ackNumber
+        mobile: activeMobile,
+        ackNumber: activeAck
       });
-    } catch (err) {
-      setErrorMsg(err.message);
-      toast.error(err.message);
-    } finally {
       setLoading(false);
-    }
+    }, 600);
   };
 
   const roleTabs = [
@@ -560,79 +549,7 @@ export default function LoginPage({
             </form>
           )}
 
-          {/* Quick Demo Fill Pills — fills all fields for convenience; does NOT pre-fill on page load */}
-          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-2">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300">
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-              <span>Quick Demo Fill (Generic Titles)</span>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5 text-left">
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab('CITIZEN');
-                  setCitizenMode('MOBILE');
-                  setMobileNumber('9876543210');
-                  setCitizenOtp('123456');
-                }}
-                className="p-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-amber-400 transition-colors cursor-pointer"
-              >
-                <div className="text-[10px] font-bold text-amber-600 truncate">Citizen</div>
-                <div className="text-[9px] text-slate-400 font-mono">9876543210</div>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab('POLICE');
-                  setPoliceId('POL-DL-4892');
-                  setPoliceStation('Special Investigation Division PS, Mandir Marg');
-                  setPolicePassword('123456');
-                }}
-                className="p-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-orange-400 transition-colors cursor-pointer"
-              >
-                <div className="text-[10px] font-bold text-orange-600 truncate">Police Official</div>
-                <div className="text-[9px] text-slate-400 font-mono">POL-DL-4892</div>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab('JUDICIAL');
-                  setJudicialId('JUD-ND-1044');
-                  setJudicialCourt('Patiala House Courts, New Delhi');
-                  setJudicialPassword('123456');
-                }}
-                className="p-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-sky-400 transition-colors cursor-pointer"
-              >
-                <div className="text-[10px] font-bold text-sky-600 truncate">Judicial Officer</div>
-                <div className="text-[9px] text-slate-400 font-mono">JUD-ND-1044</div>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab('FORENSIC');
-                  setForensicId('FSL-EXP-209');
-                  setForensicLab('Central Forensic Science Laboratory (CFSL), New Delhi');
-                  setForensicPassword('123456');
-                }}
-                className="p-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-emerald-400 transition-colors cursor-pointer"
-              >
-                <div className="text-[10px] font-bold text-emerald-600 truncate">Forensic Officer</div>
-                <div className="text-[9px] text-slate-400 font-mono">FSL-EXP-209</div>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab('AUDITOR');
-                  setAuditorId('AUD-MHA-007');
-                  setAuditorPassword('123456');
-                }}
-                className="p-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-purple-400 transition-colors cursor-pointer"
-              >
-                <div className="text-[10px] font-bold text-purple-600 truncate">Statutory Auditor</div>
-                <div className="text-[9px] text-slate-400 font-mono">AUD-MHA-007</div>
-              </button>
-            </div>
-          </div>
+
 
         </div>
 
