@@ -48,7 +48,7 @@ import { translations } from '../i18n/translations';
  * Cadre Dashboard View per Master Spec Section 5, 7, 8, 9, 10:
  * - Dedicated role-scoped sidebar links per cadre (nothing extra)
  * - Police: Home, My Cases, Upload New FIR, My Edit Requests, Chain of Custody, Notifications, Settings (Saffron accent)
- * - Judicial: Home, Cases Pending Verification, Hash Verification Tool, $65B / §65B Certificate Generator, Approval Queue, Settings (Chakra-blue accent)
+ * - Judicial: Home, Cases Pending Verification, Hash Verification Tool, Quorum Approval, Audit Log (read-only), Settings (Chakra-blue accent)
  * - Forensic: Home, Reports Awaiting Upload, Upload New Report, OCR/Analysis Queue, Evidence Chain of Custody, My Pending Reviews, Settings (Sage-green accent)
  * - Auditor: Home, WORM Audit Log, De-anonymize Requests, Emergency Override Review, Verify Integrity, Settings (Purple accent)
  * - Fully responsive with mobile drawer
@@ -110,9 +110,8 @@ export default function DashboardView({
           { id: 'overview', label: 'Home', icon: Home, badge: null },
           { id: 'pending', label: 'Cases Pending Verification', icon: FolderArchive, badge: documents.length },
           { id: 'verify', label: 'Hash Verification Tool', icon: Hash, badge: null },
-          { id: 'cert65b', label: '§65B Certificate Generator', icon: Award, badge: null },
           { id: 'approvals', label: 'Quorum Approval', icon: FileCheck2, badge: documents.filter(d => d.status === 'PENDING_QUORUM').length || null },
-          { id: 'audit', label: 'WORM Audit Log', icon: ScrollText, badge: null },
+          { id: 'audit', label: 'Audit Log (read-only)', icon: ScrollText, badge: null },
           { id: 'settings', label: 'Settings', icon: Settings, badge: null }
         ];
       case 'FORENSIC':
@@ -208,14 +207,6 @@ export default function DashboardView({
   const sidebarTabs = getSidebarTabs();
 
   const handleTabClick = (tabId) => {
-    // If clicking Quorum Approval from Judicial or Forensic, navigate to approvals or set tab
-    if ((role === 'JUDICIAL' && tabId === 'approvals') || (role === 'FORENSIC' && tabId === 'reviews')) {
-      if (onNavigateToApprovals) {
-        onNavigateToApprovals();
-        handleCloseMobileDrawer();
-        return;
-      }
-    }
     setActiveSidebarTab(tabId);
     handleCloseMobileDrawer();
   };

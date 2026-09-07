@@ -344,14 +344,14 @@ export default function LandingPage({
               </div>
               <div>
                 <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                  $65B / §65B Certificate Generator
+                  Judicial Cryptographic Verification
                 </h3>
                 <span className="text-[10px] font-bold text-purple-600 uppercase tracking-wider">
                   Court Admissibility
                 </span>
               </div>
               <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                Generates court certificates citing Evidence Act §65B and Section 63 BSA 2023 with verified device digests, officer attestations, and court seals for direct courtroom trials.
+                Direct judicial docket scrutiny under Section 63 BSA 2023 and Evidence Act §65B with real-time SHA-256 hash verification against unalterable root ledgers.
               </p>
             </div>
 

@@ -32,7 +32,7 @@ export default function ContactView({ lang = 'en' }) {
       location: "India Gate Circle, New Delhi - 110001",
       phone: "011-23384210",
       email: "registry-phc@delhicourts.nic.in",
-      role: "Section 65B BSA Certified Admissibility"
+      role: "Electronic Evidence Authentication & Admissibility"
     },
     {
       unit: "Central Forensic Science Laboratory (CFSL)",
@@ -57,7 +57,7 @@ export default function ContactView({ lang = 'en' }) {
             {lang === 'hi' ? 'कानूनी अधिनियम एवं नोडल संपर्क निर्देशिका' : 'Statutory Guidelines & Nodal Authority Directory'}
           </h2>
           <p className="text-xs text-slate-500 mt-1">
-            Official contact points for electronic evidence verification and court certificate queries.
+            Official contact points for electronic evidence verification and custody compliance queries.
           </p>
         </div>
 

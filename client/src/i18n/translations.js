@@ -58,7 +58,7 @@ export const translations = {
     cardPoliceBtn: "Police Portal Login",
 
     cardJudicialTitle: "Judicial Authority",
-    cardJudicialDesc: "Review case evidence submitted to court, verify record integrity, issue Section 65B certificates, and vote on review queues.",
+    cardJudicialDesc: "Review case evidence submitted to court, verify record integrity mathematically, and cast consensus votes in review queues.",
     cardJudicialBtn: "Judicial Portal Login",
 
     cardForensicTitle: "Forensic Expert",
@@ -121,8 +121,6 @@ export const translations = {
     judicialWidgetPendingVerify: "Cases Submitted for Court Verification",
     judicialWidgetHashTool: "Evidence Integrity Verification Tool",
     judicialWidgetHashDesc: "Select an evidence document to verify its cryptographic ledger seal against the original court submission.",
-    judicialWidgetCertGen: "Section 65B Certificate Generator",
-    judicialWidgetCertBtn: "Issue §65B Admissibility Certificate",
     judicialWidgetDeAnon: "De-anonymize Request (Audit Authority)",
     judicialWidgetDeAnonDesc: "Statutory disclosure of an anonymous reviewer's identity. Requires typed judicial justification and is permanently logged.",
     judicialWidgetQueue: "Judicial Approval Queue",
@@ -225,7 +223,7 @@ export const translations = {
     cardPoliceBtn: "पुलिस पोर्टल लॉगिन",
 
     cardJudicialTitle: "न्यायिक प्राधिकरण",
-    cardJudicialDesc: "न्यायालय में प्रस्तुत साक्ष्यों की सत्यता जांचें, धारा 65B प्रमाण पत्र जारी करें और अनुमोदन कतारों पर निर्णय लें।",
+    cardJudicialDesc: "न्यायालय में प्रस्तुत साक्ष्यों की गणितीय सत्यता जांचें और अनुमोदन कतारों पर निर्णय लें।",
     cardJudicialBtn: "न्यायिक पोर्टल लॉगिन",
 
     cardForensicTitle: "फॉरेंसिक विशेषज्ञ",
@@ -288,8 +286,6 @@ export const translations = {
     judicialWidgetPendingVerify: "न्यायिक सत्यापन हेतु प्रस्तुत प्रकरण",
     judicialWidgetHashTool: "साक्ष्य सत्यता सत्यापन उपकरण",
     judicialWidgetHashDesc: "न्यायालय में प्रस्तुत साक्ष्य की मूल लेजर सील से सत्यता की तत्काल पुष्टि करें।",
-    judicialWidgetCertGen: "धारा 65B प्रमाण पत्र निर्माता",
-    judicialWidgetCertBtn: "धारा 65B ग्राह्यता प्रमाण पत्र जारी करें",
     judicialWidgetDeAnon: "पहचान प्रकटीकरण अनुरोध (ऑडिट प्राधिकारी)",
     judicialWidgetDeAnonDesc: "समीक्षक की पहचान का कानूनी प्रकटीकरण। लिखित न्यायिक औचित्य अनिवार्य है और यह ऑडिट लॉग में दर्ज होता है।",
     judicialWidgetQueue: "न्यायिक अनुमोदन कतार",
