@@ -27,13 +27,18 @@ import {
 import AuditLogView from '../AuditLogView';
 import { useToast } from '../../context/ToastContext';
 import { translations } from '../../i18n/translations';
+import RoleSettingsPanel from '../../components/RoleSettingsPanel';
+
 
 export default function AuditorDashboard({ 
   activeUser, 
   activeTab = 'overview',
   onSelectTab,
   onNavigateToTab,
-  lang = 'en'
+  lang = 'en',
+  darkMode = false,
+  onToggleDark,
+  onToggleLang
 }) {
   const t = translations[lang] || translations.en;
   const toast = useToast();
@@ -643,32 +648,14 @@ export default function AuditorDashboard({
 
       {/* VIEW: SETTINGS */}
       {currentTab === 'settings' && (
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6 animate-in fade-in">
-          <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
-            <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">
-              Statutory Audit Authority Configuration
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Parameters governing immutable storage retention, export authorizations, and court transmission.
-            </p>
-          </div>
-
-          <div className="space-y-4 max-w-xl text-xs">
-            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-1">
-              <span className="font-bold text-slate-900 dark:text-slate-100">Mandatory Retention Horizon</span>
-              <p className="text-slate-500 dark:text-slate-400">
-                All WORM blocks and AES-256 ciphertexts are retained for a minimum statutory period of <strong>7 Years</strong> per Information Technology (Preservation of Records) Rules.
-              </p>
-            </div>
-
-            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-1">
-              <span className="font-bold text-slate-900 dark:text-slate-100">Hardware WORM Anchor</span>
-              <p className="text-slate-500 dark:text-slate-400">
-                Primary anchor committed to Government of India National Cryptographic Evidence Vault.
-              </p>
-            </div>
-          </div>
-        </div>
+        <RoleSettingsPanel
+          activeUser={activeUser}
+          role="AUDITOR"
+          lang={lang}
+          darkMode={darkMode}
+          onToggleDark={onToggleDark}
+          onToggleLang={onToggleLang}
+        />
       )}
 
     </div>

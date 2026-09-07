@@ -67,7 +67,10 @@ export default function DashboardView({
   lang = 'en',
   mobileSidebarOpen = false,
   onCloseMobileSidebar,
-  onOpenMobileSidebar
+  onOpenMobileSidebar,
+  darkMode = false,
+  onToggleDark,
+  onToggleLang
 }) {
   const t = translations[lang] || translations.en;
   const role = activeUser?.portalRole || 'POLICE';
@@ -392,6 +395,9 @@ export default function DashboardView({
               activeTab={activeSidebarTab}
               onSelectTab={setActiveSidebarTab}
               lang={lang}
+              darkMode={darkMode}
+              onToggleDark={onToggleDark}
+              onToggleLang={onToggleLang}
             />
           ) : role === 'JUDICIAL' ? (
             <JudicialDashboard
@@ -404,6 +410,9 @@ export default function DashboardView({
               activeTab={activeSidebarTab}
               onSelectTab={setActiveSidebarTab}
               lang={lang}
+              darkMode={darkMode}
+              onToggleDark={onToggleDark}
+              onToggleLang={onToggleLang}
             />
           ) : role === 'FORENSIC' ? (
             <ForensicDashboard
@@ -417,6 +426,9 @@ export default function DashboardView({
               activeTab={activeSidebarTab}
               onSelectTab={setActiveSidebarTab}
               lang={lang}
+              darkMode={darkMode}
+              onToggleDark={onToggleDark}
+              onToggleLang={onToggleLang}
             />
           ) : role === 'AUDITOR' ? (
             <AuditorDashboard
@@ -424,6 +436,9 @@ export default function DashboardView({
               activeTab={activeSidebarTab}
               onSelectTab={setActiveSidebarTab}
               lang={lang}
+              darkMode={darkMode}
+              onToggleDark={onToggleDark}
+              onToggleLang={onToggleLang}
             />
           ) : (
             <PoliceDashboard
@@ -437,6 +452,9 @@ export default function DashboardView({
               activeTab={activeSidebarTab}
               onSelectTab={setActiveSidebarTab}
               lang={lang}
+              darkMode={darkMode}
+              onToggleDark={onToggleDark}
+              onToggleLang={onToggleLang}
             />
           )}
         </div>

@@ -27,6 +27,8 @@ import { translations } from '../../i18n/translations';
 import { useToast } from '../../context/ToastContext';
 import AuditLogView from '../AuditLogView';
 import ApprovalsView from '../ApprovalsView';
+import RoleSettingsPanel from '../../components/RoleSettingsPanel';
+
 
 /**
  * Judicial Dashboard per Master Spec Section 8 & 20.3:
@@ -45,7 +47,10 @@ export default function JudicialDashboard({
   onGoToApprovals,
   activeUser,
   activeTab = 'overview',
-  lang = 'en'
+  lang = 'en',
+  darkMode = false,
+  onToggleDark,
+  onToggleLang
 }) {
   const t = translations[lang] || translations.en;
   const toast = useToast();
@@ -530,6 +535,17 @@ export default function JudicialDashboard({
             </div>
           </div>
         </div>
+      )}
+      {/* VIEW: SETTINGS */}
+      {activeTab === 'settings' && (
+        <RoleSettingsPanel
+          activeUser={activeUser}
+          role="JUDICIAL"
+          lang={lang}
+          darkMode={darkMode}
+          onToggleDark={onToggleDark}
+          onToggleLang={onToggleLang}
+        />
       )}
 
     </div>

@@ -27,6 +27,8 @@ import {
 import { translations } from '../../i18n/translations';
 import DragDropUploader from '../../components/DragDropUploader';
 import { useToast } from '../../context/ToastContext';
+import RoleSettingsPanel from '../../components/RoleSettingsPanel';
+
 
 /**
  * Police Dashboard per Master Spec Section 7 & 20.4:
@@ -46,7 +48,10 @@ export default function PoliceDashboard({
   onGoToChain,
   activeUser,
   activeTab = 'overview',
-  lang = 'en'
+  lang = 'en',
+  darkMode = false,
+  onToggleDark,
+  onToggleLang
 }) {
   const t = translations[lang] || translations.en;
   const toast = useToast();
@@ -422,6 +427,17 @@ export default function PoliceDashboard({
             </div>
           </div>
         </div>
+      )}
+      {/* VIEW: SETTINGS */}
+      {activeTab === 'settings' && (
+        <RoleSettingsPanel
+          activeUser={activeUser}
+          role="POLICE"
+          lang={lang}
+          darkMode={darkMode}
+          onToggleDark={onToggleDark}
+          onToggleLang={onToggleLang}
+        />
       )}
 
     </div>

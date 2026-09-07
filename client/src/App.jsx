@@ -216,6 +216,20 @@ function AppContent() {
     setLang(prev => prev === 'en' ? 'hi' : 'en');
   };
 
+  const handleToggleDarkMode = () => {
+    setDarkMode(prev => {
+      const next = !prev;
+      if (next) {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+      }
+      return next;
+    });
+  };
+
   const handleChangeFontSize = (delta) => {
     setFontSizeLevel(delta);
   };
@@ -356,19 +370,7 @@ function AppContent() {
         highContrast={highContrast}
         onToggleHighContrast={handleToggleHighContrast}
         darkMode={darkMode}
-        onToggleDarkMode={() => {
-          setDarkMode(prev => {
-            const next = !prev;
-            if (next) {
-              document.documentElement.classList.add('dark');
-              localStorage.setItem('theme', 'dark');
-            } else {
-              document.documentElement.classList.remove('dark');
-              localStorage.setItem('theme', 'light');
-            }
-            return next;
-          });
-        }}
+        onToggleDarkMode={handleToggleDarkMode}
         onOpenShortcuts={() => setShortcutsOpen(true)}
       />
 
@@ -461,6 +463,9 @@ function AppContent() {
             mobileSidebarOpen={mobileSidebarOpen}
             onCloseMobileSidebar={() => setMobileSidebarOpen(false)}
             onOpenMobileSidebar={() => setMobileSidebarOpen(true)}
+            darkMode={darkMode}
+            onToggleDark={handleToggleDarkMode}
+            onToggleLang={handleToggleLang}
           />
         ) : currentTab === 'approvals' ? (
           /* Dedicated Quorum Approvals Page (/approvals per Section 12) */

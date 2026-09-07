@@ -26,6 +26,8 @@ import {
 import { translations } from '../../i18n/translations';
 import DragDropUploader from '../../components/DragDropUploader';
 import { useToast } from '../../context/ToastContext';
+import RoleSettingsPanel from '../../components/RoleSettingsPanel';
+
 
 export default function ForensicDashboard({ 
   documents = [], 
@@ -37,7 +39,10 @@ export default function ForensicDashboard({
   activeUser,
   activeTab = 'overview',
   onSelectTab,
-  lang = 'en'
+  lang = 'en',
+  darkMode = false,
+  onToggleDark,
+  onToggleLang
 }) {
   const t = translations[lang] || translations.en;
   const toast = useToast();
@@ -862,32 +867,14 @@ export default function ForensicDashboard({
 
       {/* VIEW: SETTINGS */}
       {currentTab === 'settings' && (
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6 animate-in fade-in">
-          <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
-            <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">
-              Forensic Science Laboratory Configuration
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Standards and cryptographic calibration for laboratory instruments and DNA sequencing apparatus.
-            </p>
-          </div>
-
-          <div className="space-y-4 max-w-xl text-xs">
-            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-1">
-              <span className="font-bold text-slate-900 dark:text-slate-100">Accreditation Standard</span>
-              <p className="text-slate-500 dark:text-slate-400">
-                NABL Accredited Forensic Science Laboratory conforming to ISO/IEC 17025:2017 standards for chemical, biological, and digital evidence analysis.
-              </p>
-            </div>
-
-            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-1">
-              <span className="font-bold text-slate-900 dark:text-slate-100">AES-256 Storage & Seal Protocol</span>
-              <p className="text-slate-500 dark:text-slate-400">
-                All raw bitstreams and genetic allele loci records are encrypted via AES-256-GCM prior to persistent storage.
-              </p>
-            </div>
-          </div>
-        </div>
+        <RoleSettingsPanel
+          activeUser={activeUser}
+          role="FORENSIC"
+          lang={lang}
+          darkMode={darkMode}
+          onToggleDark={onToggleDark}
+          onToggleLang={onToggleLang}
+        />
       )}
 
     </div>
