@@ -22,7 +22,8 @@ import {
   Settings as SettingsIcon,
   Eye,
   AlertTriangle,
-  Lock
+  Lock,
+  Gavel
 } from 'lucide-react';
 import { translations } from '../../i18n/translations';
 import DragDropUploader from '../../components/DragDropUploader';
@@ -173,46 +174,86 @@ export default function PoliceDashboard({
             {myCases.map(doc => (
               <div 
                 key={doc.id}
-                className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-850 hover:border-orange-300 dark:hover:border-orange-700 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-850 hover:border-orange-300 dark:hover:border-orange-700 transition-all space-y-3"
               >
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs font-bold text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700">
-                      {doc.firNo}
-                    </span>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300">
-                      v{doc.currentVersion} Locked
-                    </span>
-                    {doc.status === 'PENDING_QUORUM' && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300">
-                        Draft Pending Review
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="space-y-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-mono text-xs font-bold text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700">
+                        {doc.firNo}
                       </span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300">
+                        v{doc.currentVersion} Locked
+                      </span>
+                      {doc.verdict && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-sky-100 dark:bg-sky-950 text-sky-800 dark:text-sky-300 border border-sky-200 dark:border-sky-800 flex items-center gap-1">
+                          <Gavel className="w-3 h-3 text-[#4FA8E0]" />
+                          <span>Verdict Delivered</span>
+                        </span>
+                      )}
+                      {doc.status === 'PENDING_QUORUM' && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300">
+                          Draft Pending Review
+                        </span>
+                      )}
+                    </div>
+                    <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 font-serif">
+                      {doc.caseTitle}
+                    </h4>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-sans">
+                      Acts: <strong>{doc.actsAndSections}</strong>
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => onSelectDocument && onSelectDocument(doc)}
+                      className="px-3.5 py-1.5 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-700 transition-colors flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                      <span>View FIR</span>
+                    </button>
+                    {!doc.verdict && (
+                      <button
+                        onClick={() => onSelectDocument && onSelectDocument(doc)}
+                        className="px-3.5 py-1.5 bg-orange-50 dark:bg-orange-950 text-[#FF6A1A] hover:bg-orange-100 text-xs font-bold rounded-xl border border-orange-200 dark:border-orange-800 transition-colors flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <FileEdit className="w-3.5 h-3.5" />
+                        <span>Request Edit</span>
+                      </button>
                     )}
                   </div>
-                  <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 font-serif">
-                    {doc.caseTitle}
-                  </h4>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 font-sans">
-                    Acts: <strong>{doc.actsAndSections}</strong>
-                  </p>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => onSelectDocument && onSelectDocument(doc)}
-                    className="px-3.5 py-1.5 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-700 transition-colors flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <Eye className="w-3.5 h-3.5" />
-                    <span>View FIR</span>
-                  </button>
-                  <button
-                    onClick={() => onSelectDocument && onSelectDocument(doc)}
-                    className="px-3.5 py-1.5 bg-orange-50 dark:bg-orange-950 text-[#FF6A1A] hover:bg-orange-100 text-xs font-bold rounded-xl border border-orange-200 dark:border-orange-800 transition-colors flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <FileEdit className="w-3.5 h-3.5" />
-                    <span>Request Edit</span>
-                  </button>
-                </div>
+                {/* Read-Only Verdict Card for Police Officer */}
+                {doc.verdict && (
+                  <div className="p-3.5 rounded-xl bg-sky-50/80 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800 space-y-2 text-xs">
+                    <div className="flex items-center justify-between font-bold text-sky-950 dark:text-sky-200">
+                      <span className="flex items-center gap-1.5">
+                        <Gavel className="w-3.5 h-3.5 text-[#4FA8E0]" />
+                        <span>Judicial Ruling & Final Judgment (Read-Only)</span>
+                      </span>
+                      <span className="px-2 py-0.5 rounded text-[10px] uppercase font-bold bg-sky-100 dark:bg-sky-900 text-[#4FA8E0]">
+                        {doc.verdict.disposition}
+                      </span>
+                    </div>
+                    <div className="text-slate-800 dark:text-slate-200 font-serif">
+                      {doc.verdict.verdictTitle} — {doc.verdict.bench || doc.verdict.presidingCourt}
+                    </div>
+                    {doc.verdict.summary && (
+                      <p className="text-[11px] text-slate-600 dark:text-slate-400 italic line-clamp-2">
+                        "{doc.verdict.summary}"
+                      </p>
+                    )}
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-[10px] text-slate-500 dark:text-slate-400 font-mono pt-1 border-t border-sky-100 dark:border-sky-900/60">
+                      <span>Presiding: {doc.verdict.judgeName} ({doc.verdict.judgeBadge})</span>
+                      <span>•</span>
+                      <span>Pronounced: {new Date(doc.verdict.deliveredAt).toLocaleDateString()}</span>
+                      <span>•</span>
+                      <span>Digest: {doc.verdict.fileSha256?.substring(0, 16)}...</span>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>

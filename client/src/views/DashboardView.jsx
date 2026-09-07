@@ -33,6 +33,7 @@ import {
   X,
   FileCheck,
   ShieldAlert,
+  Gavel,
   KeyRound,
   Eye,
   ArrowRight
@@ -48,7 +49,7 @@ import { translations } from '../i18n/translations';
  * Cadre Dashboard View per Master Spec Section 5, 7, 8, 9, 10:
  * - Dedicated role-scoped sidebar links per cadre (nothing extra)
  * - Police: Home, My Cases, Upload New FIR, My Edit Requests, Chain of Custody, Notifications, Settings (Saffron accent)
- * - Judicial: Home, Cases Pending Verification, Hash Verification Tool, Quorum Approval, Audit Log (read-only), Settings (Chakra-blue accent)
+ * - Judicial: Home, Cases Pending Verification, Upload Verdict, Quorum Approval, WORM Audit Log (read-only), Settings (Chakra-blue accent)
  * - Forensic: Home, Reports Awaiting Upload, Upload New Report, OCR/Analysis Queue, Evidence Chain of Custody, My Pending Reviews, Settings (Sage-green accent)
  * - Auditor: Home, WORM Audit Log, De-anonymize Requests, Emergency Override Review, Verify Integrity, Settings (Purple accent)
  * - Fully responsive with mobile drawer
@@ -70,7 +71,8 @@ export default function DashboardView({
   onOpenMobileSidebar,
   darkMode = false,
   onToggleDark,
-  onToggleLang
+  onToggleLang,
+  onVerdictSuccess
 }) {
   const t = translations[lang] || translations.en;
   const role = activeUser?.portalRole || 'POLICE';
@@ -109,9 +111,9 @@ export default function DashboardView({
         return [
           { id: 'overview', label: 'Home', icon: Home, badge: null },
           { id: 'pending', label: 'Cases Pending Verification', icon: FolderArchive, badge: documents.length },
-          { id: 'verify', label: 'Hash Verification Tool', icon: Hash, badge: null },
+          { id: 'upload_verdict', label: 'Upload Verdict', icon: Gavel, badge: null },
           { id: 'approvals', label: 'Quorum Approval', icon: FileCheck2, badge: documents.filter(d => d.status === 'PENDING_QUORUM').length || null },
-          { id: 'audit', label: 'Audit Log (read-only)', icon: ScrollText, badge: null },
+          { id: 'audit', label: 'WORM Audit Log (read-only)', icon: ScrollText, badge: null },
           { id: 'settings', label: 'Settings', icon: Settings, badge: null }
         ];
       case 'FORENSIC':
@@ -404,6 +406,7 @@ export default function DashboardView({
               darkMode={darkMode}
               onToggleDark={onToggleDark}
               onToggleLang={onToggleLang}
+              onVerdictSuccess={onVerdictSuccess}
             />
           ) : role === 'FORENSIC' ? (
             <ForensicDashboard

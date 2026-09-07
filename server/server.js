@@ -292,6 +292,54 @@ app.post('/api/documents', (req, res) => {
   }
 });
 
+// Upload Verdict / Judicial Ruling (Section 15 & 13)
+app.post('/api/documents/:id/verdict', (req, res) => {
+  try {
+    const { id } = req.params;
+    const { 
+      verdictTitle, 
+      disposition, 
+      verdictSummary, 
+      fileName, 
+      fileSize, 
+      sha256, 
+      authorId, 
+      ocrText, 
+      isAddendum 
+    } = req.body;
+
+    if (!disposition || !verdictSummary) {
+      return res.status(400).json({ error: "Verdict disposition and judgment summary are mandatory." });
+    }
+
+    const author = DEMO_PERSONAS.find(p => p.id === authorId) || DEMO_PERSONAS.find(p => p.portalRole === 'JUDICIAL');
+    if (!author || author.portalRole !== 'JUDICIAL') {
+      return res.status(403).json({ error: "PERMISSION DENIED: Only authorized Judicial Officers can upload final judgments." });
+    }
+
+    const result = store.addVerdict(id, {
+      verdictTitle,
+      disposition,
+      verdictSummary,
+      fileName,
+      fileSize,
+      sha256,
+      ocrText,
+      isAddendum
+    }, author);
+
+    res.json({
+      success: true,
+      message: "Final Judicial Verdict sealed and locked in WORM repository.",
+      document: result.doc,
+      verdict: result.verdict
+    });
+  } catch (err) {
+    console.error("Error uploading verdict:", err);
+    res.status(err.status || 400).json({ error: err.message });
+  }
+});
+
 /* =========================================================
    3. EDIT REQUESTS & QUORUM APPROVAL (LAYERS 3, 4)
    ========================================================= */

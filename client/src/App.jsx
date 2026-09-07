@@ -351,6 +351,15 @@ function AppContent() {
     toast.success(`FIR ${newDoc.firNo} sealed into tamper-evident repository!`);
   };
 
+  const handleVerdictSuccess = (updatedDoc, verdict) => {
+    fetchAllData();
+    setDocuments(prev => prev.map(d => d.id === updatedDoc.id ? { ...d, ...updatedDoc, verdict } : d));
+    if (selectedDoc && selectedDoc.id === updatedDoc.id) {
+      setSelectedDoc(prev => ({ ...prev, ...updatedDoc, verdict }));
+    }
+    toast.success(`Judicial Verdict sealed & locked on Case ${updatedDoc.firNo}!`);
+  };
+
   // Dynamic font scaling
   const fontScaleClass = 
     fontSizeLevel === 1 ? 'text-[115%]' : 
@@ -468,6 +477,7 @@ function AppContent() {
             darkMode={darkMode}
             onToggleDark={handleToggleDarkMode}
             onToggleLang={handleToggleLang}
+            onVerdictSuccess={handleVerdictSuccess}
           />
         ) : currentTab === 'approvals' ? (
           /* Dedicated Quorum Approvals Page (/approvals per Section 12) */

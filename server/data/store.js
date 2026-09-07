@@ -215,9 +215,15 @@ class DataStore {
       const doc = this.documents.get(link.documentId);
       if (doc) {
         let plainStatus = "Under Investigation";
-        if (doc.status === "PENDING_QUORUM") plainStatus = "Update Pending Review";
-        else if (doc.status === "LOCKED") plainStatus = "Under Investigation";
-        else if (doc.status === "REJECTED") plainStatus = "Case Closed";
+        if (doc.verdict) {
+          plainStatus = `Verdict Delivered — ${new Date(doc.verdict.deliveredDate).toLocaleDateString('en-GB')}`;
+        } else if (doc.status === "PENDING_QUORUM") {
+          plainStatus = "Update Pending Review";
+        } else if (doc.status === "LOCKED") {
+          plainStatus = "Under Investigation";
+        } else if (doc.status === "REJECTED") {
+          plainStatus = "Case Closed";
+        }
 
         results.push({
           id: doc.id,
@@ -232,12 +238,127 @@ class DataStore {
           status: plainStatus,
           statusCode: doc.status,
           incidentSummary: doc.incidentSummary,
-          partyRole: link.partyRole
+          partyRole: link.partyRole,
+          verdict: doc.verdict || null
         });
       }
     });
 
     return results;
+  }
+
+  /**
+   * Judicial Verdict Upload (Authoritative Judgment)
+   * Narrowly scoped exception for final rulings:
+   * - Does NOT require quorum peer review
+   * - Cannot overwrite an existing verdict (no-overwrite rule; addendum only)
+   * - Hashed with SHA-256 and locked immediately into WORM ledger
+   */
+  addVerdict(docId, verdictData, author) {
+    if (author.portalRole !== "JUDICIAL") {
+      const err = new Error("PERMISSION DENIED: Only authorized Judicial Officers can pronounce and upload final verdicts.");
+      err.status = 403;
+      throw err;
+    }
+
+    const doc = this.documents.get(docId);
+    if (!doc) {
+      const err = new Error("Case record not found for verdict linkage.");
+      err.status = 404;
+      throw err;
+    }
+
+    // No-overwrite rule: once uploaded, a verdict cannot be overwritten
+    if (doc.verdict && !verdictData.isAddendum) {
+      const err = new Error("IMMUTABLE RULING RULE: A final judgment has already been locked for this case. Overwriting is strictly prohibited. You may only attach a dated supplementary addendum.");
+      err.status = 409;
+      throw err;
+    }
+
+    const timestamp = new Date().toISOString();
+    const verdictId = `VERDICT-${doc.firNo.replace(/[^a-zA-Z0-9]/g, '-')}-${Date.now()}`;
+    const verdictHash = verdictData.sha256 || sha256((verdictData.verdictSummary || "") + timestamp + doc.id);
+
+    const verdict = {
+      id: verdictId,
+      documentType: "Judgment",
+      verdictTitle: verdictData.verdictTitle || `Final Judicial Judgment in ${doc.firNo}`,
+      judgeName: author.name || "Judicial Magistrate",
+      judgeId: author.id,
+      court: author.court || doc.court || "Patiala House Courts, New Delhi",
+      disposition: verdictData.disposition || "CONVICTED",
+      verdictSummary: verdictData.verdictSummary || "Judgment pronounced after judicial trial.",
+      deliveredDate: timestamp,
+      fileName: verdictData.fileName || "Final_Judgment_Order.pdf",
+      fileSize: verdictData.fileSize || "2.1 MB",
+      sha256: verdictHash,
+      status: "LOCKED_FINAL",
+      lockedAt: timestamp,
+      ocrConfirmedText: verdictData.ocrText || verdictData.verdictSummary || null,
+      isAddendum: !!verdictData.isAddendum
+    };
+
+    if (verdictData.isAddendum && doc.verdict) {
+      if (!doc.verdictAddendums) doc.verdictAddendums = [];
+      doc.verdictAddendums.push(verdict);
+    } else {
+      doc.verdict = verdict;
+      doc.statusPlain = `Verdict Delivered — ${new Date(timestamp).toLocaleDateString('en-GB')}`;
+      doc.verdictDeliveredAt = timestamp;
+    }
+
+    if (!doc.evidenceFiles) doc.evidenceFiles = [];
+    doc.evidenceFiles.push({
+      name: verdict.fileName,
+      size: verdict.fileSize,
+      sha256: verdict.sha256,
+      type: "Judgment",
+      uploadedBy: author.name
+    });
+
+    // Create block in the hash-chain immediately (no quorum required for final judicial order)
+    const prevBlock = this.chain[this.chain.length - 1];
+    const block = createBlock({
+      previousBlock: prevBlock,
+      docId: doc.id,
+      version: doc.currentVersion,
+      payload: {
+        docId: doc.id,
+        firNo: doc.firNo,
+        documentType: "Judgment",
+        judgeName: verdict.judgeName,
+        court: verdict.court,
+        disposition: verdict.disposition,
+        verdictHash: verdict.sha256,
+        deliveredDate: verdict.deliveredDate
+      },
+      actorId: wormAudit.getPseudonym(author.id, "Judicial Magistrate"),
+      actorRole: "Judicial Magistrate",
+      action: "JUDICIAL_VERDICT_PRONOUNCED_AND_LOCKED"
+    });
+
+    this.chain.push(block);
+
+    // Append to WORM Audit Log
+    wormAudit.append({
+      layerNumber: 5,
+      layerName: "Layer 5 - Judicial Pronouncement & Final Seal",
+      employeeId: author.id,
+      role: author.role || "Judicial Magistrate",
+      action: "JUDICIAL_VERDICT_LOCKED",
+      docId: doc.id,
+      version: doc.currentVersion,
+      beforeHash: prevBlock.hash,
+      afterHash: block.hash,
+      details: {
+        disposition: verdict.disposition,
+        court: verdict.court,
+        verdictHash: verdict.sha256,
+        firNo: doc.firNo
+      }
+    });
+
+    return { doc, verdict };
   }
 
   createDocument(data, author) {

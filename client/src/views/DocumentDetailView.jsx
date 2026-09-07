@@ -15,7 +15,10 @@ import {
   Building2,
   Calendar,
   Layers,
-  Sparkles
+  Sparkles,
+  Gavel,
+  Download,
+  FileText
 } from 'lucide-react';
 import AshokaEmblem from '../components/AshokaEmblem';
 import { translations } from '../i18n/translations';
@@ -285,6 +288,93 @@ export default function DocumentDetailView({
 
           </div>
         </div>
+
+        {/* ================= OFFICIAL JUDICIAL VERDICT (NEW FEATURE) ================= */}
+        {selectedDoc?.verdict && (
+          <div className="bg-white dark:bg-slate-900 border border-sky-300 dark:border-sky-700/70 rounded-3xl p-6 sm:p-8 shadow-sm space-y-4 animate-in fade-in">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-sky-100 dark:bg-sky-950 text-[#4FA8E0] flex items-center justify-center">
+                  <Gavel className="w-5 h-5" />
+                </div>
+                <div>
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-sky-100 dark:bg-sky-950 text-[#4FA8E0] border border-sky-200 dark:border-sky-800">
+                    Authoritative Adjudication (Document Type: Judgment)
+                  </span>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 mt-1 font-serif">
+                    {selectedDoc.verdict.verdictTitle}
+                  </h3>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 self-start sm:self-auto">
+                <span className="px-3 py-1 rounded-full text-xs font-extrabold uppercase bg-sky-100 dark:bg-sky-900 text-[#4FA8E0] border border-sky-300 dark:border-sky-700">
+                  {selectedDoc.verdict.disposition}
+                </span>
+                <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 flex items-center gap-1">
+                  <Lock className="w-3 h-3" />
+                  <span>Sealed & Final</span>
+                </span>
+              </div>
+            </div>
+
+            <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700/60 space-y-2 font-serif text-slate-800 dark:text-slate-200">
+              <div className="text-xs font-bold text-slate-500 dark:text-slate-400 font-sans uppercase tracking-wider">
+                Human-Confirmed Operative Order (CrPC / BNSS)
+              </div>
+              <p className="text-xs sm:text-sm leading-relaxed italic">
+                "{selectedDoc.verdict.summary || 'Judicial ruling entered and immutably locked on the ledger.'}"
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs text-slate-600 dark:text-slate-400 font-sans">
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/50">
+                <span className="text-[10px] uppercase font-bold text-slate-400 block">Presiding Bench</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200">{selectedDoc.verdict.bench || selectedDoc.verdict.presidingCourt}</span>
+              </div>
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/50">
+                <span className="text-[10px] uppercase font-bold text-slate-400 block">Adjudicating Judicial Officer</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200">{selectedDoc.verdict.judgeName} ({selectedDoc.verdict.judgeBadge})</span>
+              </div>
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/50">
+                <span className="text-[10px] uppercase font-bold text-slate-400 block">Pronouncement Timestamp</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200">{new Date(selectedDoc.verdict.deliveredAt).toLocaleString()}</span>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-sky-50/60 dark:bg-sky-950/30 rounded-xl border border-sky-200 dark:border-sky-900/60 text-xs">
+              <div className="font-mono text-[11px] text-slate-600 dark:text-slate-400 truncate max-w-lg">
+                SHA-256 Judgment Digest: <strong className="text-sky-800 dark:text-sky-300">{selectedDoc.verdict.fileSha256}</strong>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  const element = document.createElement("a");
+                  const file = new Blob([
+                    `OFFICIAL JUDICIAL VERDICT & FINAL COURT ORDER\n` +
+                    `Case FIR: ${selectedDoc.firNo}\n` +
+                    `Docket Title: ${selectedDoc.caseTitle}\n` +
+                    `Presiding Bench: ${selectedDoc.verdict.bench || selectedDoc.verdict.presidingCourt}\n` +
+                    `Presiding Officer: ${selectedDoc.verdict.judgeName} (${selectedDoc.verdict.judgeBadge})\n` +
+                    `Pronounced: ${selectedDoc.verdict.deliveredAt}\n` +
+                    `Operative Disposition: ${selectedDoc.verdict.disposition}\n` +
+                    `SHA-256 Digest: ${selectedDoc.verdict.fileSha256}\n\n` +
+                    `OPERATIVE COURT RULING:\n${selectedDoc.verdict.summary}\n`
+                  ], { type: 'text/plain' });
+                  element.href = URL.createObjectURL(file);
+                  element.download = `Verdict_${selectedDoc.firNo.replace(/[\/\\:]/g, '_')}.txt`;
+                  document.body.appendChild(element);
+                  element.click();
+                  document.body.removeChild(element);
+                  toast.success("Certified Court Order downloaded.");
+                }}
+                className="px-3.5 py-1.5 bg-[#4FA8E0] hover:bg-[#3B97D1] text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer self-start sm:self-auto"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Download Judgment</span>
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* ================= CONTROLS BELOW THE FORM (SECTION 11) ================= */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-colors">

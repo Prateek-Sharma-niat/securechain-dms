@@ -1,6 +1,7 @@
 const quorumEngine = require('./ledger/quorumEngine');
 const store = require('./data/store');
 const { encryptAtRest, decryptOnTheFly } = require('./ledger/encryption');
+const { DEMO_PERSONAS } = require('./data/seedData');
 
 console.log("=== RUNNING DIRECT UNIT TESTS ===");
 
@@ -66,6 +67,61 @@ if (citizenRecords.some(r => r.id !== "FIR-2024-ND-0842")) {
   process.exit(1);
 }
 console.log("PASS: Citizen records isolation verified.");
+
+// 5. Test Judicial Verdict Upload & Immediate Lock
+const judge = DEMO_PERSONAS.find(p => p.portalRole === "JUDICIAL");
+const police = DEMO_PERSONAS.find(p => p.portalRole === "POLICE");
+
+// 5A: Non-judicial role upload must be rejected
+try {
+  store.addVerdict("FIR-2024-ND-0842", { disposition: "CONVICTED", verdictSummary: "Test by police" }, police);
+  console.error("FAIL: Police was allowed to upload a judicial verdict!");
+  process.exit(1);
+} catch (err) {
+  if (err.status === 403) {
+    console.log("PASS: Non-judicial role blocked from verdict upload with 403 Forbidden.");
+  } else {
+    console.error("FAIL: Unexpected error on non-judicial verdict upload:", err);
+    process.exit(1);
+  }
+}
+
+// 5B: Judicial officer uploads authoritative verdict
+const verdictRes = store.addVerdict("FIR-2024-ND-0842", {
+  verdictTitle: "Final Judgment of Conviction",
+  disposition: "CONVICTED",
+  verdictSummary: "Accused convicted under Section 420/468 IPC. Sentenced to 3 years rigorous imprisonment.",
+  fileName: "Judgment_FIR_0842_2024.pdf"
+}, judge);
+
+if (!verdictRes.verdict || verdictRes.verdict.disposition !== "CONVICTED" || verdictRes.doc.verdict.status !== "LOCKED_FINAL") {
+  console.error("FAIL: Verdict upload did not seal correctly!");
+  process.exit(1);
+}
+console.log("PASS: Judicial verdict uploaded, hashed, and immediately locked without quorum.");
+
+// 5C: No-overwrite rule check
+try {
+  store.addVerdict("FIR-2024-ND-0842", { disposition: "ACQUITTED", verdictSummary: "Attempted overwrite" }, judge);
+  console.error("FAIL: Overwrite of existing verdict was incorrectly permitted!");
+  process.exit(1);
+} catch (err) {
+  if (err.status === 409) {
+    console.log("PASS: No-overwrite rule enforced with 409 Conflict.");
+  } else {
+    console.error("FAIL: Unexpected error on verdict overwrite attempt:", err);
+    process.exit(1);
+  }
+}
+
+// 5D: Citizen visibility check
+const citizenRecordsAfterVerdict = store.getCitizenRecords("CIT-001");
+const updatedRecord = citizenRecordsAfterVerdict.find(r => r.id === "FIR-2024-ND-0842");
+if (!updatedRecord || !updatedRecord.verdict || !updatedRecord.status.startsWith("Verdict Delivered")) {
+  console.error("FAIL: Citizen records did not reflect delivered verdict:", updatedRecord);
+  process.exit(1);
+}
+console.log("PASS: Citizen records reflect plain language verdict status:", updatedRecord.status);
 
 console.log("ALL UNIT TESTS PASSED SUCCESSFULLY!");
 process.exit(0);

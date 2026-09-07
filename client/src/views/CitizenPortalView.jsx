@@ -17,7 +17,10 @@ import {
   UploadCloud,
   CheckCircle2,
   Lock,
-  ArrowLeft
+  ArrowLeft,
+  Gavel,
+  Download,
+  FileCheck
 } from 'lucide-react';
 import { translations } from '../i18n/translations';
 import PasswordField from '../components/PasswordField';
@@ -420,7 +423,9 @@ export default function CitizenPortalView({
 
                       {/* Plain-Language Status Badge */}
                       <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                        rec.status === 'Under Investigation' || rec.status === 'जांच जारी है'
+                        rec.status?.startsWith('Verdict Delivered') || rec.status?.startsWith('निर्णय सुनाया गया')
+                          ? 'bg-sky-50 dark:bg-sky-950 text-[#4FA8E0] dark:text-sky-300 border border-sky-300 dark:border-sky-800'
+                          : rec.status === 'Under Investigation' || rec.status === 'जांच जारी है'
                           ? 'bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
                           : rec.status === 'Update Pending Review' || rec.status === 'समीक्षा लंबित है'
                           ? 'bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
@@ -438,6 +443,83 @@ export default function CitizenPortalView({
                         {rec.incidentSummary}
                       </p>
                     </div>
+
+                    {/* CITIZEN VERDICT DELIVERED TIMELINE CARD (NEW FEATURE) */}
+                    {rec.verdict && (
+                      <div className="p-4 rounded-2xl bg-sky-50/70 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800/80 space-y-3">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-xl bg-sky-100 dark:bg-sky-900 text-[#4FA8E0] flex items-center justify-center">
+                              <Gavel className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <h4 className="text-xs font-bold text-sky-950 dark:text-sky-100">
+                                Verdict Delivered — {new Date(rec.verdict.deliveredAt).toLocaleDateString(lang === 'hi' ? 'hi-IN' : 'en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}
+                              </h4>
+                              <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                                Final Court Ruling Issued & Sealed
+                              </span>
+                            </div>
+                          </div>
+                          <span className="px-2.5 py-1 rounded-full text-xs font-extrabold bg-sky-100 dark:bg-sky-900 text-[#4FA8E0] border border-sky-300 dark:border-sky-700 self-start sm:self-auto">
+                            Disposition: {rec.verdict.disposition}
+                          </span>
+                        </div>
+
+                        <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-sky-100 dark:border-sky-900/60 text-xs text-slate-800 dark:text-slate-200 space-y-1.5 font-sans">
+                          <div className="font-bold text-slate-900 dark:text-slate-100">
+                            {rec.verdict.verdictTitle}
+                          </div>
+                          <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed font-serif italic">
+                            "{rec.verdict.summary || 'Court order delivered and formally entered into permanent registry.'}"
+                          </p>
+                          <div className="text-[10px] text-slate-500 dark:text-slate-400 pt-1">
+                            Presiding Bench: <strong>{rec.verdict.bench || rec.verdict.presidingCourt}</strong> • Judge: <strong>{rec.verdict.judgeName}</strong>
+                          </div>
+                        </div>
+
+                        {/* View / Download Option for Citizen */}
+                        <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                          <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
+                            <FileCheck className="w-3.5 h-3.5 text-emerald-600" />
+                            <span>Certified Sealed Judgment Copy ({rec.verdict.fileSize || '1.8 MB'})</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const element = document.createElement("a");
+                              const file = new Blob([
+                                `====================================================\n` +
+                                `OFFICIAL JUDICIAL VERDICT & FINAL COURT ORDER\n` +
+                                `====================================================\n\n` +
+                                `Case FIR: ${rec.firNo}\n` +
+                                `Docket Title: ${rec.caseTitle}\n` +
+                                `Presiding Court: ${rec.verdict.bench || rec.verdict.presidingCourt}\n` +
+                                `Presiding Judicial Officer: ${rec.verdict.judgeName} (${rec.verdict.judgeBadge})\n` +
+                                `Date of Pronouncement: ${new Date(rec.verdict.deliveredAt).toLocaleString()}\n` +
+                                `Operative Disposition: ${rec.verdict.disposition}\n` +
+                                `SHA-256 Immutable Ledger Digest: ${rec.verdict.fileSha256}\n\n` +
+                                `OPERATIVE COURT RULING SUMMARY:\n` +
+                                `----------------------------------------------------\n` +
+                                `${rec.verdict.summary || 'Final order pronounced on merits.'}\n` +
+                                `----------------------------------------------------\n` +
+                                `Notice: This record is immutably sealed on the MHA SecureChain WORM audit ledger.\n`
+                              ], { type: 'text/plain;charset=utf-8' });
+                              element.href = URL.createObjectURL(file);
+                              element.download = `Verdict_${rec.firNo.replace(/[\/\\:]/g, '_')}.txt`;
+                              document.body.appendChild(element);
+                              element.click();
+                              document.body.removeChild(element);
+                              toast.success("Certified Court Verdict downloaded successfully.");
+                            }}
+                            className="px-3.5 py-1.5 bg-[#4FA8E0] hover:bg-[#3B97D1] text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+                          >
+                            <Download className="w-3.5 h-3.5" />
+                            <span>View & Download Verdict</span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 text-xs text-slate-600 dark:text-slate-400">
                       <div className="flex items-center gap-2">
