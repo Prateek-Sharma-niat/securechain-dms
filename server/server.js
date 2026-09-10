@@ -59,9 +59,10 @@ app.post('/api/auth/login', (req, res) => {
   } else if (!user) {
     if (cleanId.startsWith('JUD')) user = DEMO_PERSONAS.find(p => p.portalRole === 'JUDICIAL');
     else if (cleanId.startsWith('FSL')) user = DEMO_PERSONAS.find(p => p.portalRole === 'FORENSIC');
+    else if (cleanId.startsWith('FOR')) user = DEMO_PERSONAS.find(p => p.portalRole === 'FORENSIC');
     else if (cleanId.startsWith('POL')) user = DEMO_PERSONAS.find(p => p.portalRole === 'POLICE');
-    else if (cleanId.startsWith('AUD')) user = DEMO_PERSONAS.find(p => p.portalRole === 'AUDITOR');
   }
+
 
   if (!user) {
     return res.status(401).json({ error: `Invalid ID '${employeeId}'. Please select an authorized officer ID.` });
@@ -118,8 +119,8 @@ app.post('/api/audit/de-anonymize', (req, res) => {
       return res.status(400).json({ error: "Both target pseudonym and legal justification are mandatory." });
     }
 
-    const officer = DEMO_PERSONAS.find(p => p.id === officerId) || DEMO_PERSONAS.find(p => p.portalRole === 'AUDITOR');
-    if (!officer || officer.portalRole !== 'AUDITOR' || !officer.canDeAnonymize) {
+    const officer = DEMO_PERSONAS.find(p => p.id === officerId) || DEMO_PERSONAS.find(p => p.portalRole === 'JUDICIAL');
+    if (!officer || officer.portalRole !== 'JUDICIAL' || !officer.canDeAnonymize) {
       return res.status(403).json({ 
         error: "PERMISSION DENIED: Only authorized Ministry of Home Affairs Statutory Auditors can de-anonymize review officers under statutory audit protocol." 
       });

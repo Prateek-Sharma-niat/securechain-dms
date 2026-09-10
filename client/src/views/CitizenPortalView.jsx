@@ -49,6 +49,35 @@ export default function CitizenPortalView({
   const [fetchingRecords, setFetchingRecords] = useState(false);
   const [loginError, setLoginError] = useState('');
 
+  // Per-field inline validation errors (additive — loginError banner still exists)
+  const [fieldErrors, setFieldErrors] = useState({});
+
+  /** UX-layer format validation for citizen portal fields. */
+  const validateField = (name, value) => {
+    const v = (value || '').trim();
+    switch (name) {
+      case 'mobileNumber':
+        if (!v) return 'Mobile number is required.';
+        if (!/^\d{10}$/.test(v)) return 'Must be exactly 10 digits (numbers only).';
+        return '';
+      case 'ackNumber':
+        if (!v) return 'Acknowledgement / FIR number is required.';
+        return '';
+      case 'otp':
+        if (!v) return 'OTP is required.';
+        if (!/^\d{6}$/.test(v)) return 'OTP must be exactly 6 digits.';
+        return '';
+      default:
+        return '';
+    }
+  };
+
+  const handleFieldBlur = (name, value) => {
+    const err = validateField(name, value);
+    setFieldErrors((prev) => ({ ...prev, [name]: err }));
+  };
+
+
   // Records & Detail View
   const [records, setRecords] = useState([]);
   
@@ -94,6 +123,23 @@ export default function CitizenPortalView({
 
   const handleCitizenLogin = async (e) => {
     e.preventDefault();
+
+    // --- Per-field format validation before fetch ---
+    const mobileErr = loginTab === 'mobile' ? validateField('mobileNumber', mobileNumber) : '';
+    const ackErr = loginTab === 'ack' ? validateField('ackNumber', ackNumber) : '';
+    const otpErr = validateField('otp', otp);
+
+    if (mobileErr || ackErr || otpErr) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        ...(mobileErr ? { mobileNumber: mobileErr } : {}),
+        ...(ackErr ? { ackNumber: ackErr } : {}),
+        ...(otpErr ? { otp: otpErr } : {}),
+      }));
+      return;
+    }
+    // --- End format validation ---
+
     setLoading(true);
     setLoginError('');
 
@@ -244,12 +290,21 @@ export default function CitizenPortalView({
                     <input
                       type="tel"
                       value={mobileNumber}
-                      onChange={(e) => setMobileNumber(e.target.value)}
+                      onChange={(e) => { setMobileNumber(e.target.value); setFieldErrors((p) => ({ ...p, mobileNumber: '' })); }}
+                      onBlur={(e) => handleFieldBlur('mobileNumber', e.target.value)}
                       placeholder={t.mobilePlaceholder}
-                      className="w-full pl-12 pr-4 py-2.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#7B93AD] focus:bg-white dark:focus:bg-slate-950 font-medium"
+                      className={`w-full pl-12 pr-4 py-2.5 text-xs bg-slate-50 dark:bg-slate-900 border rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#7B93AD] focus:bg-white dark:focus:bg-slate-950 font-medium ${
+                        fieldErrors.mobileNumber ? 'border-rose-400 dark:border-rose-600' : 'border-slate-300 dark:border-slate-700'
+                      }`}
                       maxLength={10}
                     />
                   </div>
+                  {fieldErrors.mobileNumber && (
+                    <p className="text-[10px] text-rose-600 dark:text-rose-400 mt-0.5 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3 flex-shrink-0" />
+                      {fieldErrors.mobileNumber}
+                    </p>
+                  )}
                 </div>
               ) : (
                 <div>
@@ -259,26 +314,45 @@ export default function CitizenPortalView({
                   <input
                     type="text"
                     value={ackNumber}
-                    onChange={(e) => setAckNumber(e.target.value)}
+                    onChange={(e) => { setAckNumber(e.target.value); setFieldErrors((p) => ({ ...p, ackNumber: '' })); }}
+                    onBlur={(e) => handleFieldBlur('ackNumber', e.target.value)}
                     placeholder={t.ackPlaceholder}
-                    className="w-full px-4 py-2.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#7B93AD] focus:bg-white dark:focus:bg-slate-950 font-medium"
+                    className={`w-full px-4 py-2.5 text-xs bg-slate-50 dark:bg-slate-900 border rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-[#7B93AD] focus:bg-white dark:focus:bg-slate-950 font-medium ${
+                      fieldErrors.ackNumber ? 'border-rose-400 dark:border-rose-600' : 'border-slate-300 dark:border-slate-700'
+                    }`}
                   />
+                  {fieldErrors.ackNumber && (
+                    <p className="text-[10px] text-rose-600 dark:text-rose-400 mt-0.5 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3 flex-shrink-0" />
+                      {fieldErrors.ackNumber}
+                    </p>
+                  )}
                 </div>
               )}
 
               {/* OTP Field with Show/Hide Toggle */}
               {otpSent && (
-                <PasswordField
-                  id="citizen-otp-auth"
-                  name="otp"
-                  label="Enter 6-Digit SMS Verification Code"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  placeholder="123456"
-                  maxLength={6}
-                  required
-                />
+                <div className="space-y-0.5">
+                  <PasswordField
+                    id="citizen-otp-auth"
+                    name="otp"
+                    label="Enter 6-Digit SMS Verification Code"
+                    value={otp}
+                    onChange={(e) => { setOtp(e.target.value); setFieldErrors((p) => ({ ...p, otp: '' })); }}
+                    onBlur={(e) => handleFieldBlur('otp', e.target.value)}
+                    placeholder="123456"
+                    maxLength={6}
+                    required
+                  />
+                  {fieldErrors.otp && (
+                    <p className="text-[10px] text-rose-600 dark:text-rose-400 mt-0.5 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3 flex-shrink-0" />
+                      {fieldErrors.otp}
+                    </p>
+                  )}
+                </div>
               )}
+
 
               {loginError && (
                 <div className="p-3 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs rounded-xl flex items-center gap-2">

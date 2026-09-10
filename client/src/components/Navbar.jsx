@@ -63,7 +63,6 @@ export default function Navbar({
       case 'POLICE': return 'bg-[#FF6A1A]';
       case 'JUDICIAL': return 'bg-[#4FA8E0]';
       case 'FORENSIC': return 'bg-[#5FA777]';
-      case 'AUDITOR': return 'bg-purple-600';
       case 'CITIZEN': return 'bg-slate-500';
       default: return 'bg-slate-400';
     }
@@ -315,7 +314,7 @@ export default function Navbar({
                 </button>
               )}
 
-              {activeUser && activeUser.portalRole !== 'CITIZEN' && activeUser.portalRole !== 'AUDITOR' && (
+              {activeUser && activeUser.portalRole !== 'CITIZEN' && (
                 <button
                   onClick={() => { onSelectTab('approvals'); setMobileNavOpen(false); }}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors ${
@@ -331,17 +330,6 @@ export default function Navbar({
                 </button>
               )}
 
-              {activeUser?.portalRole === 'AUDITOR' && (
-                <button
-                  onClick={() => { onSelectTab('audit'); setMobileNavOpen(false); }}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors ${
-                    currentTab === 'audit' ? 'bg-purple-600 text-white' : 'text-purple-700 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-slate-800'
-                  }`}
-                >
-                  <ScrollText className="w-4 h-4" />
-                  <span>WORM Audit Vault</span>
-                </button>
-              )}
 
               {(!activeUser || activeUser.portalRole === 'CITIZEN') && (
                 <button

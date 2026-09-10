@@ -60,6 +60,9 @@ export default function AuditorDashboard({
   const [caseRefInput, setCaseRefInput] = useState('FIR-2024-ND-0842');
   const [deAnonymizeLoading, setDeAnonymizeLoading] = useState(false);
   const [revealedResult, setRevealedResult] = useState(null);
+  // Inline field error for the justification textarea
+  const [justificationFieldError, setJustificationFieldError] = useState('');
+
   const [deAnonymizeHistory, setDeAnonymizeHistory] = useState([
     {
       id: 'DEANON-901',
@@ -156,9 +159,11 @@ export default function AuditorDashboard({
   const handleDeAnonymizeSubmit = async (e) => {
     e.preventDefault();
     if (!justificationInput || justificationInput.trim().length < 15) {
+      setJustificationFieldError('Statutory Justification must be at least 15 characters under IT Act §65B / Rule 12.');
       toast.error('Statutory Justification must be at least 15 characters long under IT Act §65B / Rule 12.');
       return;
     }
+    setJustificationFieldError('');
 
     setDeAnonymizeLoading(true);
     try {
@@ -447,13 +452,28 @@ export default function AuditorDashboard({
                 <textarea
                   rows={3}
                   value={justificationInput}
-                  onChange={(e) => setJustificationInput(e.target.value)}
+                  onChange={(e) => { setJustificationInput(e.target.value); if (e.target.value.trim().length >= 15) setJustificationFieldError(''); }}
+                  onBlur={(e) => {
+                    if (e.target.value.trim().length > 0 && e.target.value.trim().length < 15) {
+                      setJustificationFieldError('Statutory Justification must be at least 15 characters under IT Act §65B / Rule 12.');
+                    }
+                  }}
                   placeholder="Enter court reference, trial order number, or statutory audit rationale requiring identity disclosure..."
-                  className="w-full px-3.5 py-2.5 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-purple-500"
+                  className={`w-full px-3.5 py-2.5 text-xs bg-slate-50 dark:bg-slate-800 border rounded-xl text-slate-900 dark:text-slate-100 focus:outline-none focus:border-purple-500 ${
+                    justificationFieldError ? 'border-rose-400 dark:border-rose-600' : 'border-slate-300 dark:border-slate-700'
+                  }`}
                   required
                 />
-                <span className="text-[10px] text-slate-400">Minimum 15 characters required. This rationale will be permanently recorded in the ledger.</span>
+                {justificationFieldError ? (
+                  <p className="text-[10px] text-rose-600 dark:text-rose-400 mt-0.5 flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3 flex-shrink-0" />
+                    {justificationFieldError}
+                  </p>
+                ) : (
+                  <span className="text-[10px] text-slate-400">Minimum 15 characters required. This rationale will be permanently recorded in the ledger.</span>
+                )}
               </div>
+
 
               <button
                 type="submit"

@@ -41,7 +41,6 @@ import {
 import PoliceDashboard from './dashboards/PoliceDashboard';
 import JudicialDashboard from './dashboards/JudicialDashboard';
 import ForensicDashboard from './dashboards/ForensicDashboard';
-import AuditorDashboard from './dashboards/AuditorDashboard';
 import EmptyState from '../components/EmptyState';
 import { translations } from '../i18n/translations';
 
@@ -127,21 +126,12 @@ export default function DashboardView({
           { id: 'approvals', label: 'Quorum Approval', icon: FileCheck2, badge: documents.filter(d => d.status === 'PENDING_QUORUM').length || null },
           { id: 'settings', label: 'Settings', icon: Settings, badge: null }
         ];
-      case 'AUDITOR':
-        return [
-          { id: 'overview', label: 'Home', icon: Home, badge: null },
-          { id: 'audit', label: 'WORM Audit Log', icon: ScrollText, badge: null },
-          { id: 'deanonymize', label: 'De-anonymize Requests', icon: KeyRound, badge: null },
-          { id: 'override', label: 'Emergency Override Review', icon: ShieldAlert, badge: 2 },
-          { id: 'verify', label: 'Verify Integrity (system-wide)', icon: CheckCircle2, badge: null },
-          { id: 'settings', label: 'Settings', icon: Settings, badge: null }
-        ];
       default:
         return [
           { id: 'overview', label: 'Home', icon: Home, badge: null },
           { id: 'cases', label: 'Case Records', icon: FolderArchive, badge: documents.length }
         ];
-    }
+    };
   };
 
   const getRoleTheme = () => {
@@ -178,17 +168,6 @@ export default function DashboardView({
           textAccent: "text-[#5FA777]",
           borderAccent: "border-emerald-200 dark:border-emerald-800",
           tagBg: "bg-emerald-100 dark:bg-emerald-950 text-[#5FA777]"
-        };
-      case 'AUDITOR':
-        return {
-          title: "Statutory Auditor Vault",
-          titleHindi: "सांविधिक लेखा परीक्षक डैशबोर्ड",
-          icon: ScrollText,
-          activeBg: "bg-purple-600 text-white",
-          activeTabBg: "bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-300 border-l-4 border-purple-600",
-          textAccent: "text-purple-600 dark:text-purple-400",
-          borderAccent: "border-purple-200 dark:border-purple-800",
-          tagBg: "bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300"
         };
       default:
         return {
@@ -416,16 +395,6 @@ export default function DashboardView({
               onOpenUpload={onOpenUpload}
               onOpenQuorum={onOpenQuorum}
               onNavigateToApprovals={onNavigateToApprovals}
-              activeUser={activeUser}
-              activeTab={activeSidebarTab}
-              onSelectTab={setActiveSidebarTab}
-              lang={lang}
-              darkMode={darkMode}
-              onToggleDark={onToggleDark}
-              onToggleLang={onToggleLang}
-            />
-          ) : role === 'AUDITOR' ? (
-            <AuditorDashboard
               activeUser={activeUser}
               activeTab={activeSidebarTab}
               onSelectTab={setActiveSidebarTab}

@@ -55,6 +55,39 @@ export default function DragDropUploader({
     setError('');
     if (!file) return;
 
+    // --- File-type validation against acceptedTypes prop ---
+    // acceptedTypes is a comma-separated string of extensions (e.g. ".pdf,.png") and/or MIME types
+    const allowedTokens = acceptedTypes
+      .split(',')
+      .map((t) => t.trim().toLowerCase())
+      .filter(Boolean);
+
+    const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+    const fileMime = (file.type || '').toLowerCase();
+
+    const isAllowed = allowedTokens.some((token) => {
+      if (token.startsWith('.')) {
+        // Extension match
+        return fileExtension === token;
+      }
+      // MIME match (supports wildcards like 'image/*')
+      if (token.endsWith('/*')) {
+        return fileMime.startsWith(token.replace('/*', '/'));
+      }
+      return fileMime === token;
+    });
+
+    if (!isAllowed) {
+      const readableTypes = allowedTokens
+        .filter((t) => t.startsWith('.'))
+        .join(', ');
+      setError(
+        `File type not permitted. Accepted formats: ${readableTypes || acceptedTypes}. Please select a valid file.`
+      );
+      return;
+    }
+    // --- End file-type validation ---
+
     if (file.size > maxSizeMB * 1024 * 1024) {
       setError(`File size exceeds maximum permitted limit of ${maxSizeMB}MB.`);
       return;

@@ -139,23 +139,9 @@ const DEMO_PERSONAS = [
     labUnit: "CFSL New Delhi",
     otp: "123456"
   },
-  {
-    id: "AUD-MHA-007",
-    portalRole: "AUDITOR",
-    name: "Statutory Auditor (WORM & Evidence Sentinel)",
-    role: "Chief Statutory Auditor & WORM Custodian",
-    department: "National Audit Directorate / Ministry of Home Affairs",
-    badge: "AUD-007",
-    rank: "Chief Custodian & Lead Auditor",
-    pseudonym: "Custodian_M07",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80",
-    canRequestEdit: false,
-    canApprove: true,
-    canDeAnonymize: true,
-    labUnit: "National Evidence Repository Vault, MHA",
-    otp: "123456"
-  }
+
 ];
+
 
 // Seed Registered Citizens for the Public / Citizen Portal
 const SEED_CITIZENS = [

@@ -13,12 +13,18 @@ import LandingPage from './views/LandingPage';
 import LoginPage from './views/LoginPage';
 import DashboardView from './views/DashboardView';
 import ApprovalsView from './views/ApprovalsView';
-import AuditorDashboard from './views/dashboards/AuditorDashboard';
 import CitizenPortalView from './views/CitizenPortalView';
 import DocumentDetailView from './views/DocumentDetailView';
 import VersionChainView from './views/VersionChainView';
 import AuditLogView from './views/AuditLogView';
 import ContactView from './views/ContactView';
+import AboutView from './views/public/AboutView';
+import SitemapView from './views/public/SitemapView';
+import TermsView from './views/public/TermsView';
+import PrivacyView from './views/public/PrivacyView';
+import AccessibilityView from './views/public/AccessibilityView';
+import CopyrightView from './views/public/CopyrightView';
+import DisclaimerView from './views/public/DisclaimerView';
 import { ToastProvider, useToast } from './context/ToastContext';
 import { translations } from './i18n/translations';
 
@@ -77,6 +83,24 @@ function AppContent() {
       localStorage.setItem('theme', 'light');
     }
   }, [darkMode]);
+
+  // URL Hash Routing Setup (Enables direct linking and footer links)
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (hash && ['home', 'dashboard', 'cases', 'approvals', 'audit', 'contact', 'citizen', 'login', 'about', 'sitemap', 'terms', 'privacy', 'accessibility', 'copyright', 'disclaimer'].includes(hash)) {
+        setCurrentTab(hash);
+      } else if (!hash) {
+        setCurrentTab('home');
+      }
+    };
+
+    // Run on initial load
+    handleHashChange();
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   // Section 14 Global Keyboard Shortcuts
   useEffect(() => {
@@ -240,10 +264,10 @@ function AppContent() {
 
   // Route Guard per Master Spec Section 4 & 5
   const handleSelectTab = (tabId) => {
-    // Audit Log access control: ONLY AUDITOR & JUDICIAL can view WORM Audit Vault (Sections 8 & 10)
+    // Audit Log access control: JUDICIAL only (Sections 8 & 10)
     if (tabId === 'audit') {
-      if (activeUser?.portalRole !== 'AUDITOR' && activeUser?.portalRole !== 'JUDICIAL') {
-        toast.warning("Access Restricted: The WORM Cryptographic Ledger is strictly restricted to certified Ministry of Home Affairs Auditors and Judicial Authorities.");
+      if (activeUser?.portalRole !== 'JUDICIAL') {
+        toast.warning("Access Restricted: The WORM Cryptographic Ledger is restricted to Judicial Authorities.");
         return;
       }
     }
@@ -259,6 +283,20 @@ function AppContent() {
       setLoginRoleIntent('POLICE');
       setCurrentTab('login');
       return;
+    }
+
+    // Allow navigating to public pages even if not logged in
+    const publicTabs = ['home', 'login', 'contact', 'citizen', 'about', 'sitemap', 'terms', 'privacy', 'accessibility', 'copyright', 'disclaimer'];
+    if (!activeUser && !publicTabs.includes(tabId)) {
+      toast.warning("Authentication Required: Please login with your official MHA credentials to access this secure zone.");
+      return;
+    }
+
+    // Sync hash to URL
+    if (tabId === 'home') {
+      window.history.pushState(null, null, ' '); // remove hash cleanly
+    } else {
+      window.location.hash = tabId;
     }
 
     setCurrentTab(tabId);
@@ -295,9 +333,7 @@ function AppContent() {
   const handleLoginSuccess = (user) => {
     setActiveUser(user);
     toast.success(`Authenticated successfully as ${user.name}`);
-    if (user.portalRole === 'AUDITOR') {
-      setCurrentTab('dashboard');
-    } else if (user.portalRole === 'CITIZEN') {
+    if (user.portalRole === 'CITIZEN') {
       setCurrentTab('citizen');
     } else {
       setCurrentTab('dashboard');
@@ -490,16 +526,8 @@ function AppContent() {
             lang={lang}
           />
         ) : currentTab === 'audit' ? (
-          /* WORM Audit Log View - Accessible to Auditor and Judicial (Sections 8 & 10) */
-          activeUser?.portalRole === 'AUDITOR' ? (
-            <div className="flex-1 bg-[#FFF9F2] dark:bg-slate-950 p-4 sm:p-8">
-              <AuditorDashboard 
-                activeUser={activeUser}
-                activeTab="audit"
-                lang={lang}
-              />
-            </div>
-          ) : activeUser?.portalRole === 'JUDICIAL' ? (
+          /* WORM Audit Log View — Judicial only */
+          activeUser?.portalRole === 'JUDICIAL' ? (
             <div className="flex-1 bg-[#FFF9F2] dark:bg-slate-950 p-4 sm:p-8">
               <div className="max-w-6xl mx-auto space-y-4">
                 <div className="bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800 p-4 rounded-2xl flex items-center justify-between text-xs text-sky-800 dark:text-sky-300">
@@ -517,7 +545,7 @@ function AppContent() {
             <div className="flex-1 flex items-center justify-center p-8">
               <div className="text-center space-y-3 bg-white dark:bg-slate-900 p-8 rounded-3xl border border-rose-300 dark:border-rose-900 max-w-md">
                 <h3 className="font-bold text-rose-600">Access Restricted</h3>
-                <p className="text-xs text-slate-500">Only authorized Statutory Auditors and Judicial Authorities can inspect the WORM audit trail.</p>
+                <p className="text-xs text-slate-500">The WORM cryptographic audit trail is restricted to Judicial Authorities only.</p>
                 <button
                   onClick={() => setCurrentTab('home')}
                   className="px-4 py-2 bg-[#FF6A1A] text-white text-xs font-bold rounded-xl cursor-pointer"
@@ -528,7 +556,21 @@ function AppContent() {
             </div>
           )
         ) : currentTab === 'contact' ? (
-          <ContactView lang={lang} onBack={() => setCurrentTab('home')} />
+          <ContactView lang={lang} onBack={() => handleSelectTab('home')} />
+        ) : currentTab === 'about' ? (
+          <AboutView lang={lang} />
+        ) : currentTab === 'sitemap' ? (
+          <SitemapView lang={lang} />
+        ) : currentTab === 'terms' ? (
+          <TermsView lang={lang} />
+        ) : currentTab === 'privacy' ? (
+          <PrivacyView lang={lang} />
+        ) : currentTab === 'accessibility' ? (
+          <AccessibilityView lang={lang} />
+        ) : currentTab === 'copyright' ? (
+          <CopyrightView lang={lang} />
+        ) : currentTab === 'disclaimer' ? (
+          <DisclaimerView lang={lang} />
         ) : (
           <LandingPage
             onOpenRoleLogin={handleOpenRoleLogin}

@@ -6,6 +6,7 @@ export default function PasswordField({
   name,
   value,
   onChange,
+  onBlur,
   placeholder = '••••••••',
   label = 'Password',
   required = false,
@@ -33,6 +34,7 @@ export default function PasswordField({
           type={showPassword ? 'text' : 'password'}
           value={value}
           onChange={onChange}
+          onBlur={onBlur}
           placeholder={placeholder}
           required={required}
           disabled={disabled}
@@ -40,6 +42,7 @@ export default function PasswordField({
           autoComplete={autoComplete}
           className={`w-full pl-9 pr-10 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-mono text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:border-[#FF6A1A] focus:bg-white dark:focus:bg-slate-950 transition-colors ${className}`}
         />
+
         <button
           type="button"
           onClick={() => setShowPassword((prev) => !prev)}
