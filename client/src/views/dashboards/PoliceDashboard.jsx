@@ -458,6 +458,58 @@ export default function PoliceDashboard({
 
           </div>
 
+          {/* Quorum Status Widget: Your Requests */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm font-bold text-slate-800 dark:text-slate-200">
+                <FileCheck className="w-5 h-5 text-[#FF6A1A]" />
+                <span>Quorum Status: Your Requests</span>
+              </div>
+              <button 
+                onClick={() => onGoToChain && onGoToChain('my_requests')}
+                className="text-xs text-[#FF6A1A] hover:underline font-bold"
+              >
+                View All
+              </button>
+            </div>
+            
+            {pendingRequests.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {pendingRequests.slice(0, 4).map(doc => {
+                  const required = doc.quorum?.required || 3;
+                  const current = doc.quorum?.current || 0;
+                  return (
+                    <div key={doc.id} className="p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 flex flex-col justify-between">
+                      <div className="flex justify-between items-start mb-2">
+                        <span className="text-xs font-bold font-mono text-slate-900 dark:text-white">{doc.firNo}</span>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300">
+                          Pending Quorum
+                        </span>
+                      </div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400 mb-2 truncate">
+                        {doc.caseTitle}
+                      </div>
+                      <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-1.5 mb-1">
+                        <div 
+                          className="bg-[#FF6A1A] h-1.5 rounded-full transition-all" 
+                          style={{ width: `${(current / required) * 100}%` }}
+                        ></div>
+                      </div>
+                      <div className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
+                        {current} of {required} approved
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="p-6 text-center border border-dashed border-slate-200 dark:border-slate-700 rounded-2xl bg-slate-50/50 dark:bg-slate-800/30">
+                <p className="text-sm font-semibold text-slate-600 dark:text-slate-400">You have no active requests.</p>
+                <p className="text-xs text-slate-500 mt-1">When you request edits, their quorum approval progress will appear here.</p>
+              </div>
+            )}
+          </div>
+
           <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl space-y-3">
             <div className="flex items-center gap-2 text-sm font-bold text-slate-800 dark:text-slate-200">
               <Activity className="w-4 h-4 text-[#FF6A1A]" />

@@ -103,7 +103,6 @@ export default function DashboardView({
           { id: 'cases', label: 'My Cases', icon: FolderArchive, badge: documents.length },
           { id: 'upload', label: 'Upload New FIR', icon: UploadCloud, badge: null },
           { id: 'my_requests', label: 'My Requests (Quorum Status)', icon: FileCheck, badge: documents.filter(d => d.status === 'PENDING_QUORUM').length || null },
-          { id: 'notifications', label: 'Notifications', icon: Bell, badge: '2' },
           { id: 'settings', label: 'Settings', icon: Settings, badge: null }
         ];
       case 'JUDICIAL':

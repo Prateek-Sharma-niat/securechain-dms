@@ -22,7 +22,9 @@ import {
   FileCheck,
   Menu,
   X,
-  Shield
+  Shield,
+  Bell,
+  Check
 } from 'lucide-react';
 import { translations } from '../i18n/translations';
 
@@ -44,15 +46,40 @@ export default function Navbar({
   const [casesMenuOpen, setCasesMenuOpen] = useState(false);
   const [helpMenuOpen, setHelpMenuOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   const casesRef = useRef(null);
   const helpRef = useRef(null);
+  const notifRef = useRef(null);
+
+  // Mock notifications based on role
+  const [notifications, setNotifications] = useState(activeUser ? [
+    ...(activeUser.portalRole === 'POLICE' ? [
+      { id: 1, text: 'Your edit on FIR-2026-089 is pending quorum.', unread: true },
+      { id: 2, text: 'Quorum approved your edit on FIR-2026-091.', unread: true }
+    ] : []),
+    ...(activeUser.portalRole === 'JUDICIAL' ? [
+      { id: 3, text: 'Pending approval for FIR-2026-089 (2 of 3 received).', unread: true },
+      { id: 4, text: 'New verdict uploaded successfully.', unread: false }
+    ] : []),
+    ...(activeUser.portalRole === 'FORENSIC' ? [
+      { id: 5, text: 'Your uploaded report was approved.', unread: true },
+      { id: 6, text: 'Pending approval for FIR-2026-089.', unread: true }
+    ] : [])
+  ] : []);
+
+  const unreadCount = notifications.filter(n => n.unread).length;
+
+  const markAllRead = () => {
+    setNotifications(notifications.map(n => ({ ...n, unread: false })));
+  };
 
   // Close dropdowns on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (casesRef.current && !casesRef.current.contains(event.target)) setCasesMenuOpen(false);
       if (helpRef.current && !helpRef.current.contains(event.target)) setHelpMenuOpen(false);
+      if (notifRef.current && !notifRef.current.contains(event.target)) setNotificationsOpen(false);
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -181,6 +208,42 @@ export default function Navbar({
           <div className="flex items-center space-x-2">
             {activeUser ? (
               <div className="flex items-center gap-1.5">
+                {/* Mobile Notification Bell */}
+                <div className="relative" ref={notifRef}>
+                  <button
+                    onClick={() => { setNotificationsOpen(!notificationsOpen); setHelpMenuOpen(false); }}
+                    className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors relative"
+                  >
+                    <Bell className="w-4 h-4" />
+                    {unreadCount > 0 && (
+                      <span className="absolute top-1 right-1 w-2 h-2 bg-rose-500 rounded-full border border-white dark:border-slate-900"></span>
+                    )}
+                  </button>
+                  {notificationsOpen && (
+                    <div className="absolute top-full right-0 mt-1 w-72 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 overflow-hidden">
+                      <div className="p-3 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                        <span className="text-xs font-bold text-slate-900 dark:text-white">Notifications</span>
+                        {unreadCount > 0 && (
+                          <button onClick={markAllRead} className="text-[10px] text-[#FF6A1A] hover:underline font-semibold flex items-center gap-1">
+                            <Check className="w-3 h-3" /> Mark all read
+                          </button>
+                        )}
+                      </div>
+                      <div className="max-h-64 overflow-y-auto">
+                        {notifications.length > 0 ? (
+                          notifications.map(n => (
+                            <div key={n.id} className={`p-3 text-xs border-b border-slate-50 dark:border-slate-800/50 ${n.unread ? 'bg-orange-50/50 dark:bg-slate-800/50' : ''}`}>
+                              <p className={`text-slate-700 dark:text-slate-300 ${n.unread ? 'font-semibold' : ''}`}>{n.text}</p>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="p-4 text-center text-xs text-slate-500">No notifications</div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 <div className="flex items-center space-x-1.5 px-2.5 py-1 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800">
                   <div className={`w-2 h-2 rounded-full ${getRoleDotColor(activeUser.portalRole)}`}></div>
                   <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate max-w-[110px]">
@@ -212,6 +275,42 @@ export default function Navbar({
           
           {activeUser ? (
             <div className="flex items-center gap-2">
+              {/* Desktop Notification Bell */}
+              <div className="relative mr-1" ref={notifRef}>
+                <button
+                  onClick={() => { setNotificationsOpen(!notificationsOpen); setHelpMenuOpen(false); }}
+                  className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors relative"
+                >
+                  <Bell className="w-4 h-4" />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-1 right-1 w-2 h-2 bg-rose-500 rounded-full border border-white dark:border-slate-900"></span>
+                  )}
+                </button>
+                {notificationsOpen && (
+                  <div className="absolute top-full right-0 mt-1 w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-1">
+                    <div className="p-3 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
+                      <span className="text-xs font-bold text-slate-900 dark:text-white">Notifications</span>
+                      {unreadCount > 0 && (
+                        <button onClick={markAllRead} className="text-[10px] text-[#FF6A1A] hover:underline font-semibold flex items-center gap-1 cursor-pointer">
+                          <Check className="w-3 h-3" /> Mark all read
+                        </button>
+                      )}
+                    </div>
+                    <div className="max-h-80 overflow-y-auto">
+                      {notifications.length > 0 ? (
+                        notifications.map(n => (
+                          <div key={n.id} className={`p-3 text-xs border-b border-slate-50 dark:border-slate-800/50 ${n.unread ? 'bg-orange-50/50 dark:bg-slate-800/50 border-l-2 border-l-[#FF6A1A]' : 'border-l-2 border-l-transparent'}`}>
+                            <p className={`text-slate-700 dark:text-slate-300 ${n.unread ? 'font-semibold' : ''}`}>{n.text}</p>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="p-6 text-center text-xs text-slate-500">No recent notifications</div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {/* Authenticated Officer Identifier (Locked to detected role) */}
               <div className="flex items-center space-x-2 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800">
                 <div className={`w-2.5 h-2.5 rounded-full ${getRoleDotColor(activeUser.portalRole)}`}></div>
